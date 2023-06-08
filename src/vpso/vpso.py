@@ -3,6 +3,7 @@ import numpy as np
 import numpy.typing as npt
 from scipy.stats.qmc import LatinHypercube
 from typing_extensions import TypeAlias
+from numba import njit
 
 
 Array: TypeAlias = npt.NDArray[np.floating]
@@ -31,6 +32,7 @@ def _initialize_particles(
     return x, v, v_max, np_random
 
 
+@njit
 def _pso_equation(
     x: Array,
     px: Array,
