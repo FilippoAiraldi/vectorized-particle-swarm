@@ -12,23 +12,23 @@ Array: TypeAlias = npt.NDArray[np.floating]
 def _initialize_particles(
     swarmsize: int,
     n_problems: int,
-    n_vars: int,
+    dim: int,
     lb: Array,
     ub: Array,
     max_velocity_rate: float,
     seed: Optional[int],
 ) -> tuple[Array, Array, Array, np.random.Generator]:
     """Initializes particle positions and velocities."""
-    lhs_sampler = LatinHypercube(d=n_problems * n_vars, seed=seed)
+    lhs_sampler = LatinHypercube(d=n_problems * dim, seed=seed)
     np_random = np.random.Generator(np.random.PCG64(seed))
     domain = ub - lb
 
     x = lb + domain * lhs_sampler.random(swarmsize).reshape(
-        swarmsize, n_problems, n_vars
+        swarmsize, n_problems, dim
     ).transpose((1, 0, 2))
 
     v_max = max_velocity_rate * domain
-    v = np_random.uniform(0, v_max, (n_problems, swarmsize, n_vars))
+    v = np_random.uniform(0, v_max, (n_problems, swarmsize, dim))
     return x, v, v_max, np_random
 
 
@@ -38,8 +38,6 @@ def _pso_equation(
     px: Array,
     sx: Array,
     v: Array,
-    lb: Array,
-    ub: Array,
     v_max: Array,
     w: float,
     c1: float,
@@ -52,17 +50,54 @@ def _pso_equation(
 
     inerta = w * v
     cognitive = c1 * r1 * (px - x)
-    social = c2 * r2 * (sx - x)
+    social = c2 * r2 * (sx[:, np.newaxis] - x)
 
     v_new = np.clip(inerta + cognitive + social, -v_max, v_max)
-
     x_new = x + v_new
-    maskl = x_new < lb
-    masku = x_new > ub
-    if maskl.any():
-        x_new[maskl] = (lb + np_random.random(x.shape) * (x - lb))[maskl]
-    if masku.any():
-        x_new[masku] = (ub + np_random.random(x.shape) * (ub - x))[masku]
+    return x_new, v_new
+
+
+@njit
+def _repair_out_of_bounds(
+    x: Array,
+    x_new: Array,
+    v_new: Array,
+    px: Array,
+    sx: Array,
+    v: Array,
+    lb: Array,
+    ub: Array,
+    v_max: Array,
+    w: float,
+    c1: float,
+    c2: float,
+    np_random: np.random.Generator,
+    iters: int,
+) -> tuple[Array, Array]:
+    """Repairs particles that have gone out of bounds."""
+    lmask = x_new < lb
+    umask = x_new > ub
+    if not lmask.any() and not umask.any():
+        return x_new, v_new
+
+    # run the pso equation for a few iterations to try to get back in bounds
+    for _ in range(iters):
+        mask = lmask | umask
+        x_new_, v_new_ = _pso_equation(x, px, sx, v, v_max, w, c1, c2, np_random)
+        x_new = np.where(mask, x_new_, x_new)
+        v_new = np.where(mask, v_new_, v_new)
+        lmask = x_new < lb
+        umask = x_new > ub
+        any_lmask = lmask.any()
+        any_umask = umask.any()
+        if not any_lmask and not any_umask:
+            return x_new, v_new
+
+    # otherwise, repair by random sampling
+    if any_lmask:
+        x_new = np.where(lmask, lb + np_random.random(x.shape) * (x - lb), x_new)
+    if any_umask:
+        x_new = np.where(umask, ub - np_random.random(x.shape) * (ub - x), x_new)
     return x_new, v_new
 
 
@@ -123,6 +158,7 @@ def vpso(
     c1: float = 2.0,
     c2: float = 2.0,
     #
+    repair_iters: int = 20,
     mutation_prob: float = 0.9,
     #
     maxiter: int = 300,
@@ -131,21 +167,23 @@ def vpso(
 ) -> Array:
     lb = np.expand_dims(lb, 1)  # add swarm dimension
     ub = np.expand_dims(ub, 1)  # add swarm dimension
-    n_problems, _, n_vars = lb.shape
+    nvec, _, dim = lb.shape
 
-    # initialize particle positions and velocities, and best particles
-    x, v, v_max, np_random = _initialize_particles(
-        swarmsize, n_problems, n_vars, lb, ub, max_velocity_rate, seed
+    # initialize particle positions and velocities
+    x, v, v_max, rng = _initialize_particles(
+        swarmsize, nvec, dim, lb, ub, max_velocity_rate, seed
     )
-    f = func(x).reshape(n_problems, swarmsize)  # current particles' values
-    px = x  # best particles's positions
-    pf = f  # best particles's values
-    sx = x[np.arange(n_problems), f.argmin(1)]  # social best
-    sx = sx[:, np.newaxis].repeat(swarmsize, axis=1)  # add swarm dimension
+    f = func(x).reshape(nvec, swarmsize)  # particle's current value
+    px = x.copy()  # particle's best position
+    pf = f.copy()  # particle's best value
+    sx = x[np.arange(nvec), f.argmin(1)]  # (social/global) best particle
 
     # main optimization loop
     for _ in range(maxiter):
-        x_new, v_new = _pso_equation(x, px, sx, v, lb, ub, v_max, w, c1, c2, np_random)
+        x_new, v_new = _pso_equation(x, px, sx, v, v_max, w, c1, c2, rng)
+        x_new, v_new = _repair_out_of_bounds(
+            x, x_new, v_new, px, sx, v, lb, ub, v_max, w, c1, c2, rng, repair_iters
+        )
 
         # perturb best solution
         x_new = _polynomial_mutation(
