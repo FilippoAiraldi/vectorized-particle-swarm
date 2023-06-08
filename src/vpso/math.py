@@ -1,5 +1,9 @@
 import numpy as np
-from scipy.spatial.distance import _distance_pybind
+from scipy.spatial.distance import (
+    _copy_array_if_base_present,
+    _distance_pybind,
+    _distance_wrap,
+)
 
 from vpso.jit import jit
 from vpso.typing import Array2d, Array3d
@@ -56,6 +60,29 @@ def batch_pdist(X: Array3d, dist_func=_distance_pybind.pdist_euclidean) -> Array
     out = np.empty((N, (M - 1) * M // 2), dtype=X.dtype)
     for i in range(N):
         dist_func(X[i], out=out[i])
+    return out
+
+
+def batch_squareform(D: Array2d) -> Array2d:
+    """Converts a batch of pairwise distance matrices to distance matrices.
+
+    Parameters
+    ----------
+    D : 2d array
+        Pairwise distance matrices of shape `(N, M * (M - 1) / 2)`, i.e., as returned by
+        `batch_pdist` and not in square form.
+
+    Returns
+    -------
+    3d array
+        The same distance matrices but in square form, i.e., of shape `(N, M, M)`.
+    """
+    D = _copy_array_if_base_present(D)
+    N, M = D.shape
+    d = int(0.5 * (np.sqrt(8 * M + 1) + 1))
+    out = np.zeros((N, d, d), dtype=D.dtype)
+    for i in range(N):
+        _distance_wrap.to_squareform_from_vector_wrap(out[i], D[i])
     return out
 
 
