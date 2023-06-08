@@ -1,3 +1,7 @@
+import os
+
+os.environ['NUMBA_DISABLE_JIT'] = '1'
+
 import unittest
 from pymoo.problems.single import Ackley
 from pymoo.algorithms.soo.nonconvex.pso import PSO
@@ -26,10 +30,11 @@ class TestNumerical(unittest.TestCase):
             seed=49,
         )
 
+        nvec = 3
         res_ = vpso(
-            lambda x: np.asarray([problem.evaluate(x[0])] * 2),
-            problem.xl[np.newaxis],
-            problem.xu[np.newaxis],
+            lambda x: np.asarray([problem.evaluate(x_) for x_ in x]),
+            np.tile(problem.xl, (nvec, 1)),
+            np.tile(problem.xu, (nvec, 1)),
             swarmsize=pop_size,
             seed=49,
         )

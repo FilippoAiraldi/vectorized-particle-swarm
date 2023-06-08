@@ -11,7 +11,7 @@ Array: TypeAlias = npt.NDArray[np.floating]
 
 def _initialize_particles(
     swarmsize: int,
-    n_problems: int,
+    nvec: int,
     dim: int,
     lb: Array,
     ub: Array,
@@ -19,16 +19,16 @@ def _initialize_particles(
     seed: Optional[int],
 ) -> tuple[Array, Array, Array, np.random.Generator]:
     """Initializes particle positions and velocities."""
-    lhs_sampler = LatinHypercube(d=n_problems * dim, seed=seed)
+    lhs_sampler = LatinHypercube(d=nvec * dim, seed=seed)
     np_random = np.random.Generator(np.random.PCG64(seed))
     domain = ub - lb
 
     x = lb + domain * lhs_sampler.random(swarmsize).reshape(
-        swarmsize, n_problems, dim
+        swarmsize, nvec, dim
     ).transpose((1, 0, 2))
 
     v_max = max_velocity_rate * domain
-    v = np_random.uniform(0, v_max, (n_problems, swarmsize, dim))
+    v = np_random.uniform(0, v_max, (nvec, swarmsize, dim))
     return x, v, v_max, np_random
 
 
@@ -74,13 +74,13 @@ def _repair_out_of_bounds(
     np_random: np.random.Generator,
     iters: int,
 ) -> tuple[Array, Array]:
-    """Repairs particles that have gone out of bounds."""
+    """Repairs particles that have gone out of bounds with an iterative process and, if
+    it failed, with random re-sampling."""
     lmask = x_new < lb
     umask = x_new > ub
     if not lmask.any() and not umask.any():
         return x_new, v_new
 
-    # run the pso equation for a few iterations to try to get back in bounds
     for _ in range(iters):
         mask = lmask | umask
         x_new_, v_new_ = _pso_equation(x, px, sx, v, v_max, w, c1, c2, np_random)
@@ -93,7 +93,6 @@ def _repair_out_of_bounds(
         if not any_lmask and not any_umask:
             return x_new, v_new
 
-    # otherwise, repair by random sampling
     if any_lmask:
         x_new = np.where(lmask, lb + np_random.random(x.shape) * (x - lb), x_new)
     if any_umask:
@@ -106,29 +105,29 @@ def _polynomial_mutation(
     pf: Array,
     lb: Array,
     ub: Array,
-    n_problems: int,
-    n_vars: int,
+    nvec: int,
+    dim: int,
     mutation_prob: float,
     np_random: np.random.Generator,
 ) -> Array:
     if np_random.random() > mutation_prob:
         return x
 
-    mutation_mask = np_random.random((n_problems, n_vars)) <= min(0.5, 1 / n_vars)
+    mutation_mask = np_random.random((nvec, dim)) <= min(0.5, 1 / dim)
     if not mutation_mask.any():
         return x
 
     # pick best particle for each problem
     k = pf.argmin(1)
-    problems = np.arange(n_problems)
+    problems = np.arange(nvec)
     x_best = x[problems, np.newaxis, k]
 
     # compute mutations
     domain = ub - lb
     delta = np.asarray(((x_best - lb) / domain, (ub - x_best) / domain))
-    eta = np_random.uniform(low=5, high=30, size=(1, n_problems, 1, 1))
+    eta = np_random.uniform(low=5, high=30, size=(1, nvec, 1, 1))
     xy = np.power(1 - delta, eta + 1)
-    rand = np_random.random((n_problems, 1, n_vars))
+    rand = np_random.random((nvec, 1, dim))
     d = np.power(
         np.asarray(
             (
@@ -173,6 +172,9 @@ def vpso(
     x, v, v_max, rng = _initialize_particles(
         swarmsize, nvec, dim, lb, ub, max_velocity_rate, seed
     )
+
+    # initialize other quantities
+    # TODO: to understand how these are saved after each iteration
     f = func(x).reshape(nvec, swarmsize)  # particle's current value
     px = x.copy()  # particle's best position
     pf = f.copy()  # particle's best value
