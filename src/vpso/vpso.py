@@ -1,10 +1,11 @@
 from typing import Callable, Optional
+
 import numpy as np
 import numpy.typing as npt
 from scipy.stats.qmc import LatinHypercube
 from typing_extensions import TypeAlias
-from numba import njit
 
+from vpso.jit import _int, jit
 
 Array: TypeAlias = npt.NDArray[np.floating]
 
@@ -32,7 +33,7 @@ def _initialize_particles(
     return x, v, v_max, np_random
 
 
-@njit
+@jit
 def _pso_equation(
     x: Array,
     px: Array,
@@ -43,7 +44,7 @@ def _pso_equation(
     c1: float,
     c2: float,
     np_random: np.random.Generator,
-):
+) -> tuple[Array, Array]:
     """Updates particle positions and velocities."""
     r1 = np_random.random(x.shape)
     r2 = np_random.random(x.shape)
@@ -57,7 +58,7 @@ def _pso_equation(
     return x_new, v_new
 
 
-@njit
+@jit
 def _repair_out_of_bounds(
     x: Array,
     x_new: Array,
@@ -100,8 +101,10 @@ def _repair_out_of_bounds(
     return x_new, v_new
 
 
+@jit
 def _polynomial_mutation(
     x: Array,
+    px: Array,
     pf: Array,
     lb: Array,
     ub: Array,
@@ -110,40 +113,43 @@ def _polynomial_mutation(
     mutation_prob: float,
     np_random: np.random.Generator,
 ) -> Array:
-    if np_random.random() > mutation_prob:
-        return x
-
-    mutation_mask = np_random.random((nvec, dim)) <= min(0.5, 1 / dim)
+    """Mutates the best particle of each problem with polynomial mutation."""
+    # get the mutation mask for each vectorized problem, and for each dimension
+    mutation_mask = np.logical_and(
+        np_random.random((nvec, _int(1))) <= mutation_prob,
+        np_random.random((nvec, dim)) <= min(0.5, 1 / dim),
+    )
     if not mutation_mask.any():
         return x
 
-    # pick best particle for each problem
+    # pick the best particle from each problem as target for mutation
     k = pf.argmin(1)
-    problems = np.arange(nvec)
-    x_best = x[problems, np.newaxis, k]
+    x_best = np.empty((nvec, dim))
+    for i, j in enumerate(k):
+        x_best[i] = px[i, j]
+    # x_best = px[np.arange(nvec), k]  # cannot do this in njit
 
-    # compute mutations
+    # setup parameters
+    lb, ub = lb[:, 0], ub[:, 0]  # remove swarm dimension
     domain = ub - lb
-    delta = np.asarray(((x_best - lb) / domain, (ub - x_best) / domain))
-    eta = np_random.uniform(low=5, high=30, size=(1, nvec, 1, 1))
-    xy = np.power(1 - delta, eta + 1)
-    rand = np_random.random((nvec, 1, dim))
-    d = np.power(
-        np.asarray(
-            (
-                2 * rand + (1 - 2 * rand) * xy[0],
-                2 * (1 - rand) + 2 * (rand - 0.5) * xy[1],
-            )
-        ),
-        1.0 / (eta + 1.0),
+    eta = np_random.uniform(6.0, 31.0, (nvec, _int(1)))
+    mut_pow = 1.0 / eta
+
+    # compute mutation magnitude
+    xy1 = np.power((ub - x_best) / domain, eta)
+    xy2 = np.power((x_best - lb) / domain, eta)
+    R = np_random.random((nvec, dim))
+    val1 = np.power(2.0 * R + (1.0 - 2.0 * R) * xy1, mut_pow)
+    val2 = np.power(2.0 * (1.0 - R) + 2.0 * (R - 0.5) * xy2, mut_pow)
+    deltaq = np.where(R <= 0.5, val1 - 1.0, 1.0 - val2)
+
+    # mutate the target best particle and apply it to the original swarm
+    x_mutated = np.clip(
+        np.where(mutation_mask, x_best + deltaq * domain, x_best), lb, ub
     )
-    deltaq = np.where(rand <= 0.5, d[0] - 1, 1 - d[1])
-    x_mutated = np.clip(x_best + deltaq * domain, lb, ub)
-
-    # apply mutations
-    x[problems, k]
-
-    pass
+    for i, j in enumerate(k):
+        x[i, j] = x_mutated[i]
+    return x
 
 
 def vpso(
@@ -158,6 +164,7 @@ def vpso(
     c2: float = 2.0,
     #
     repair_iters: int = 20,
+    perturb_best: bool = True,
     mutation_prob: float = 0.9,
     #
     maxiter: int = 300,
@@ -188,9 +195,10 @@ def vpso(
         )
 
         # perturb best solution
-        x_new = _polynomial_mutation(
-            x_new, pf, lb, ub, n_problems, n_vars, mutation_prob, np_random
-        )
+        if perturb_best:
+            x_new = _polynomial_mutation(
+                x_new, px, pf, lb, ub, nvec, dim, mutation_prob, rng
+            )
 
         # check termination conditions
 
