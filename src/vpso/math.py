@@ -5,8 +5,10 @@ from vpso.jit import jit
 from vpso.typing import Array2d, Array3d
 
 
-def euclidean_cdist(X: Array3d, Y: Array3d) -> Array3d:
-    """Computes the ecludian distance matrices for 3D arrays.
+def batch_cdist(
+    X: Array3d, Y: Array3d, dist_func=_distance_pybind.cdist_euclidean
+) -> Array3d:
+    """Computes the distance matrices for 3D arrays.
 
     Parameters
     ----------
@@ -14,6 +16,9 @@ def euclidean_cdist(X: Array3d, Y: Array3d) -> Array3d:
         An array of shape `(N, M, d)`.
     Y : 3d array
         An array of shape `(N, K, d)`.
+    dist_func : callable, optional
+        Distance function to use. By default, `scipy.spatial.distance.cdist_euclidean`
+        is used. It must support the `out` argument.
 
     Returns
     -------
@@ -25,17 +30,20 @@ def euclidean_cdist(X: Array3d, Y: Array3d) -> Array3d:
     N = X.shape[0]
     out = np.empty((N, X.shape[1], Y.shape[1]), dtype=X.dtype)
     for i in range(N):
-        _distance_pybind.cdist_euclidean(X[i], Y[i], out=out[i])
+        dist_func(X[i], Y[i], out=out[i])
     return out
 
 
-def euclidean_pdist(X: Array3d) -> Array2d:
-    """Computes the pairwise ecludian distance matrices for the entries of a 3D array.
+def batch_pdist(X: Array3d, dist_func=_distance_pybind.pdist_euclidean) -> Array2d:
+    """Computes the pairwise distance matrices for the entries of a 3D array.
 
     Parameters
     ----------
     X : 3d array
         An array of shape `(N, M, d)`.
+    dist_func : callable, optional
+        Distance function to use. By default, `scipy.spatial.distance.pdist_euclidean`
+        is used. It must support the `out` argument.
 
     Returns
     -------
@@ -47,7 +55,7 @@ def euclidean_pdist(X: Array3d) -> Array2d:
     N, M = X.shape[:2]
     out = np.empty((N, (M - 1) * M // 2), dtype=X.dtype)
     for i in range(N):
-        _distance_pybind.pdist_euclidean(X[i], out=out[i])
+        dist_func(X[i], out=out[i])
     return out
 
 
