@@ -44,6 +44,23 @@ _signatures = {
         _float,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
+    "_generate_offsprings": nb.types.UniTuple(_float[:, :, :], 2)(
+        _float[:, :, :],  # x
+        _float[:, :, :],  # px
+        _float[:, :],  # pf
+        _float[:, :],  # sx
+        _float[:, :, :],  # v
+        _float[:, :, :],  # v_max
+        _float[:, :, :],  # lb
+        _float[:, :, :],  # ub
+        _int,  # nvec
+        _int,  # dim
+        _float,  # w
+        _float,  # c1
+        _float,  # c2
+        _int,  # iters
+        nb.bool_,  # perturb_best
+        _float,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
 }

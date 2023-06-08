@@ -150,6 +150,38 @@ def _polynomial_mutation(
     return x
 
 
+@jit
+def _generate_offsprings(
+    x: Array,
+    px: Array,
+    pf: Array,
+    sx: Array,
+    v: Array,
+    v_max: Array,
+    lb: Array,
+    ub: Array,
+    nvec: int,
+    dim: int,
+    w: float,
+    c1: float,
+    c2: float,
+    repair_iters: int,
+    perturb_best: bool,
+    mutation_prob: float,
+    rng: np.random.Generator,
+):
+    """Given the current swarm, generates the next generation of the particle swarm."""
+    x_new, v_new = _pso_equation(x, px, sx, v, v_max, w, c1, c2, rng)
+    x_new, v_new = _repair_out_of_bounds(
+        x, x_new, v_new, px, sx, v, v_max, lb, ub, w, c1, c2, repair_iters, rng
+    )
+    if perturb_best:
+        x_new = _polynomial_mutation(
+            x_new, px, pf, lb, ub, nvec, dim, mutation_prob, rng
+        )
+    return x_new, v_new
+
+
 def vpso(
     func: Callable[[Array], Array],
     lb: Array,
@@ -180,23 +212,44 @@ def vpso(
 
     # initialize other quantities
     # TODO: to understand how these are saved after each iteration
-    f = func(x).reshape(nvec, swarmsize)  # particle's current value
+    f = np.reshape(func(x), (nvec, swarmsize))  # particle's current value
     px = x.copy()  # particle's best position
     pf = f.copy()  # particle's best value
     sx = x[np.arange(nvec), f.argmin(1)]  # (social/global) best particle
 
     # main optimization loop
     for _ in range(maxiter):
-        x_new, v_new = _pso_equation(x, px, sx, v, v_max, w, c1, c2, rng)
-        x_new, v_new = _repair_out_of_bounds(
-            x, x_new, v_new, px, sx, v, lb, ub, v_max, w, c1, c2, rng, repair_iters
+        x_new, v_new = _generate_offsprings(
+            x,
+            px,
+            pf,
+            sx,
+            v,
+            v_max,
+            lb,
+            ub,
+            nvec,
+            dim,
+            w,
+            c1,
+            c2,
+            repair_iters,
+            perturb_best,
+            mutation_prob,
+            rng,
         )
+        f_new = np.reshape(func(x_new), (nvec, swarmsize))
 
-        # perturb best solution
-        if perturb_best:
-            x_new = _polynomial_mutation(
-                x_new, px, pf, lb, ub, nvec, dim, mutation_prob, rng
-            )
+        # TODO: implement advance
+        # infills: x_new, v_new, f_new
+        # self.pop: ??
+        f_new < f
+        # assign improved particles to pop
+
+        # update social best
+        # sx
+
+        # adapt
 
         # check termination conditions
 

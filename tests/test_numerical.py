@@ -3,11 +3,13 @@ import os
 os.environ['NUMBA_DISABLE_JIT'] = '1'
 
 import unittest
-from pymoo.problems.single import Ackley
+
+import numpy as np
 from pymoo.algorithms.soo.nonconvex.pso import PSO
 from pymoo.optimize import minimize
+from pymoo.problems.single import Ackley
 from pymoo.termination.default import DefaultSingleObjectiveTermination
-import numpy as np
+
 from vpso import vpso
 
 
@@ -26,7 +28,7 @@ class TestNumerical(unittest.TestCase):
             termination=DefaultSingleObjectiveTermination(
                 ftol=ftol, n_max_gen=n_max_gen, period=period
             ),
-            verbose=True,
+            verbose=False,
             seed=49,
         )
 
