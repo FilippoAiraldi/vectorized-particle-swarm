@@ -66,14 +66,14 @@ def _repair_out_of_bounds(
     px: Array,
     sx: Array,
     v: Array,
+    v_max: Array,
     lb: Array,
     ub: Array,
-    v_max: Array,
     w: float,
     c1: float,
     c2: float,
-    np_random: np.random.Generator,
     iters: int,
+    np_random: np.random.Generator,
 ) -> tuple[Array, Array]:
     """Repairs particles that have gone out of bounds with an iterative process and, if
     it failed, with random re-sampling."""
@@ -129,13 +129,11 @@ def _polynomial_mutation(
         x_best[i] = px[i, j]
     # x_best = px[np.arange(nvec), k]  # cannot do this in njit
 
-    # setup parameters
+    # compute mutation magnitude
     lb, ub = lb[:, 0], ub[:, 0]  # remove swarm dimension
     domain = ub - lb
     eta = np_random.uniform(6.0, 31.0, (nvec, _int(1)))
     mut_pow = 1.0 / eta
-
-    # compute mutation magnitude
     xy1 = np.power((ub - x_best) / domain, eta)
     xy2 = np.power((x_best - lb) / domain, eta)
     R = np_random.random((nvec, dim))
