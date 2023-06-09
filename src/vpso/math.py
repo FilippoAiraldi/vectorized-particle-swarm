@@ -90,7 +90,7 @@ def batch_squareform(D: Array2d) -> Array2d:
 def pso_equation(
     x: Array3d,
     px: Array3d,
-    sx: Array2d,
+    sx: Array3d,
     v: Array3d,
     v_max: Array3d,
     w: float,
@@ -108,8 +108,8 @@ def pso_equation(
         particles in the swarm, and `d` is the dimension of the search space.
     px : 3d array
         Best positions of the particles so far. An array of shape `(N, M, d)`.
-    sx : 2d array
-        Social best, i.e., the best particle so far. An array of shape `(N, d)`.
+    sx : 3d array
+        Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
     v : 3d array
         Current velocities of the particles. An array of shape `(N, M, d)`.
     v_max : 3d array
@@ -133,7 +133,7 @@ def pso_equation(
 
     inerta = w * v
     cognitive = c1 * r1 * (px - x)
-    social = c2 * r2 * (sx[:, np.newaxis] - x)
+    social = c2 * r2 * (sx - x)
 
     v_new = np.clip(inerta + cognitive + social, -v_max, v_max)
     x_new = x + v_new

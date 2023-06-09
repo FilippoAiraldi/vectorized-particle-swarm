@@ -9,7 +9,7 @@ _signatures = {
     "pso_equation": nb.types.UniTuple(_float[:, :, :], 2)(
         _float[:, :, :],  # x
         _float[:, :, :],  # px
-        _float[:, :],  # sx
+        _float[:, :, :],  # sx
         _float[:, :, :],  # v
         _float[:, :, :],  # v_max
         _float,  # w
@@ -22,7 +22,7 @@ _signatures = {
         _float[:, :, :],  # x_new
         _float[:, :, :],  # v_new
         _float[:, :, :],  # px
-        _float[:, :],  # sx
+        _float[:, :, :],  # sx
         _float[:, :, :],  # v
         _float[:, :, :],  # v_max
         _float[:, :, :],  # lb
@@ -48,7 +48,7 @@ _signatures = {
         _float[:, :, :],  # x
         _float[:, :, :],  # px
         _float[:, :],  # pf
-        _float[:, :],  # sx
+        _float[:, :, :],  # sx
         _float[:, :, :],  # v
         _float[:, :, :],  # v_max
         _float[:, :, :],  # lb

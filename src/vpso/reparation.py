@@ -2,7 +2,7 @@ import numpy as np
 
 from vpso.jit import jit
 from vpso.math import pso_equation
-from vpso.typing import Array2d, Array3d
+from vpso.typing import Array3d
 
 
 @jit
@@ -11,7 +11,7 @@ def repair_out_of_bounds(
     x_new: Array3d,
     v_new: Array3d,
     px: Array3d,
-    sx: Array2d,
+    sx: Array3d,
     v: Array3d,
     v_max: Array3d,
     lb: Array3d,
@@ -37,8 +37,8 @@ def repair_out_of_bounds(
         new candidate velocities of the particles. An array of shape `(N, M, d)`.
     px : 3d array
         Best positions of the particles so far. An array of shape `(N, M, d)`.
-    sx : 2d array
-        Social best, i.e., the best particle so far. An array of shape `(N, d)`.
+    sx : 3d array
+        Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
     v : 3d array
         Current velocities of the particles. An array of shape `(N, M, d)`.
     v_max : 3d array

@@ -3,10 +3,9 @@ from typing import Callable, Optional
 import numpy as np
 from numpy.typing import ArrayLike
 
-from vpso.initialization import initialize_particles
 from vpso.ask_and_tell import generate_offsprings
+from vpso.initialization import initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
-
 
 # def _improve_population(
 #     x: Array, f: Array, px: Array, pf: Array, sx: Array, adaptive: bool
@@ -94,7 +93,7 @@ def vpso(
     # initialize other quantities
     px = x  # particle's best position
     pf = np.reshape(func(x), (nvec, swarmsize))  # particle's best value
-    sx = x[np.arange(nvec), pf.argmin(1)]  # (social/global) best particle
+    sx = x[np.arange(nvec), np.newaxis, pf.argmin(1)]  # (social/global) best particle
 
     # main optimization loop
     for _ in range(maxiter):
