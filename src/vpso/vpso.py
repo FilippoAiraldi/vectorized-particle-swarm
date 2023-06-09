@@ -1,4 +1,4 @@
-from typing import Callable, Optional
+from typing import Callable, Optional, Union
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -22,7 +22,7 @@ def vpso(
     ub: Array2d,
     #
     swarmsize: int = 25,
-    max_velocity_rate: float = 0.2,
+    max_velocity_rate: Union[float, Array1d] = 0.2,
     w: float = 0.9,
     c1: float = 2.0,
     c2: float = 2.0,
@@ -53,8 +53,10 @@ def vpso(
         Upper bound of the search space. An array of shape `(N, d)`.
     swarmsize : int, optional
         Number of particles in the swarm to solve each problem. By default, `25`.
-    max_velocity_rate : float, optional
-        Maximum velocity rate used to initialize the particles. By default, `0.2`.
+    max_velocity_rate : float or array, optional
+        Maximum velocity rate used to initialize the particles. By default, `0.2`. Can
+        also be an 1d array_like of shape `(N,)` to specify a different value for each
+        of the `N` vectorized problems.
     w : float, optional
         Inertia weight. By default, `0.9`.
     c1 : float, optional
