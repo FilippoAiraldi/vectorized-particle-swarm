@@ -1,5 +1,3 @@
-from typing import Optional
-
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 
@@ -13,8 +11,9 @@ def initialize_particles(
     lb: Array3d,
     ub: Array3d,
     max_velocity_rate: float,
-    seed: Optional[int],
-) -> tuple[Array3d, Array3d, Array3d, np.random.Generator]:
+    lhs_sampler: LatinHypercube,
+    np_random: np.random.Generator,
+) -> tuple[Array3d, Array3d, Array3d]:
     """Initializes particle positions and velocities.
 
     Parameters
@@ -36,11 +35,10 @@ def initialize_particles(
 
     Returns
     -------
-    tuple of 3d arrays and np.random.Generator
-
+    tuple of 3d arrays
+        Returns a tuple containing the particle positions, velocities, and maximum
+        velocities.
     """
-    lhs_sampler = LatinHypercube(d=nvec * dim, seed=seed)
-    np_random = np.random.Generator(np.random.PCG64(seed))
     domain = ub - lb
 
     x = lb + domain * lhs_sampler.random(swarmsize).reshape(
@@ -49,4 +47,4 @@ def initialize_particles(
 
     v_max = max_velocity_rate * domain
     v = np_random.uniform(0, v_max, (nvec, swarmsize, dim))
-    return x, v, v_max, np_random
+    return x, v, v_max

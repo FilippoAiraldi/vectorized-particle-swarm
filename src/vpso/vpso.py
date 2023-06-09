@@ -2,6 +2,7 @@ from typing import Callable, Optional
 
 import numpy as np
 from numpy.typing import ArrayLike
+from scipy.stats.qmc import LatinHypercube
 
 from vpso.ask_and_tell import generate_offsprings
 from vpso.initialization import initialize_particles
@@ -86,8 +87,10 @@ def vpso(
     nvec, _, dim = lb.shape
 
     # initialize particle positions and velocities
-    x, v, v_max, np_random = initialize_particles(
-        nvec, swarmsize, dim, lb, ub, max_velocity_rate, seed
+    lhs_sampler = LatinHypercube(d=nvec * dim, seed=seed)
+    np_random = np.random.Generator(np.random.PCG64(seed))
+    x, v, v_max = initialize_particles(
+        nvec, swarmsize, dim, lb, ub, max_velocity_rate, lhs_sampler, np_random
     )
 
     # initialize other quantities
