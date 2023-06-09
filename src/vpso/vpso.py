@@ -4,8 +4,9 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.stats.qmc import LatinHypercube
 
+from vpso.adaptive import adapt
 from vpso.ask_and_tell import generate_offsprings
-from vpso.initialization import initialize_particles
+from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
 
 # def _improve_population(
@@ -23,9 +24,9 @@ def vpso(
     #
     swarmsize: int = 25,
     max_velocity_rate: Union[float, Array1d] = 0.2,
-    w: float = 0.9,
-    c1: float = 2.0,
-    c2: float = 2.0,
+    w: Union[float, Array1d] = 0.9,
+    c1: Union[float, Array1d] = 2.0,
+    c2: Union[float, Array1d] = 2.0,
     #
     repair_iters: int = 20,
     perturb_best: bool = True,
@@ -57,12 +58,16 @@ def vpso(
         Maximum velocity rate used to initialize the particles. By default, `0.2`. Can
         also be an 1d array_like of shape `(N,)` to specify a different value for each
         of the `N` vectorized problems.
-    w : float, optional
-        Inertia weight. By default, `0.9`.
-    c1 : float, optional
-        Cognitive weight. By default, `2.0`.
-    c2 : float, optional
-        Social weight. By default, `2.0`.
+    w : float or 1d array, optional
+        Inertia weight. By default, `0.9`. Can
+        also be an 1d array_like of shape `(N,)` to specify a different value for each
+        of the `N` vectorized problems.
+    c1 : float or 1d array, optional
+        Cognitive weight. By default, `2.0`. Can also be an 1d array_like of shape
+        `(N,)` to specify a different value for each of the `N` vectorized problems.
+    c2 : float or 1d array, optional
+        Social weight. By default, `2.0`. Can also be an 1d array_like of shape `(N,)`
+        to specify a different value for each of the `N` vectorized problems.
     repair_iters : int, optional
         Number of iterations to repair particles that are outside bounds. If this
         reparation fails, the particle is randomly re-sampled. By default, `20`.
@@ -84,9 +89,10 @@ def vpso(
     tuple of (2d array, 1d array)
         Returns a tuple containing the best minimizer and minimum of each problem.
     """
-    lb = np.expand_dims(lb, 1)  # add swarm dimension
-    ub = np.expand_dims(ub, 1)  # add swarm dimension
-    nvec, _, dim = lb.shape
+    # first, adjust some dimensions
+    lb, ub, nvec, dim, max_velocity_rate, w, c1, c2 = adjust_dimensions(
+        lb, ub, max_velocity_rate, w, c1, c2
+    )
 
     # initialize particle positions and velocities
     lhs_sampler = LatinHypercube(d=nvec * dim, seed=seed)
@@ -126,16 +132,13 @@ def vpso(
         f = np.reshape(func(x), (nvec, swarmsize))
 
         # TODO: implement advance
-
-        # # improve population
+        # improve population
         # improvement_mask = f < pf
         # px = np.where(improvement_mask, x, px)
         # pf = np.where(improvement_mask, f, pf)
 
-        # update social best (here or before?)
+        # update social best (# TODO: here, after, or before? w.r.t. adapt, termination, etc.)
         # sx
-
-        # adapt
 
         # check termination conditions
 

@@ -86,16 +86,16 @@ def batch_squareform(D: Array2d) -> Array2d:
     return out
 
 
-@jit
+# @jit
 def pso_equation(
     x: Array3d,
     px: Array3d,
     sx: Array3d,
     v: Array3d,
     v_max: Array3d,
-    w: float,
-    c1: float,
-    c2: float,
+    w: Array3d,
+    c1: Array3d,
+    c2: Array3d,
     np_random: np.random.Generator,
 ) -> tuple[Array3d, Array3d]:
     """Computes the new positions and velocities of particles in a PSO algorithm.
@@ -114,12 +114,15 @@ def pso_equation(
         Current velocities of the particles. An array of shape `(N, M, d)`.
     v_max : 3d array
         Maximum velocities of the particles. An array of shape `(N, 1, d)`.
-    w : float
-        Inertia weight.
-    c1 : float
-        Cognitive weight.
-    c2 : float
-        Social weight.
+    w : 3d array
+        Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c1 : 3d array
+        Cognitive weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c2 : 3d array
+        Social weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
     np_random : np.random.Generator
         Random number generator.
 

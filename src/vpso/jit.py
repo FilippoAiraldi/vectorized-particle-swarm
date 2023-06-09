@@ -12,9 +12,9 @@ _signatures = {
         _float[:, :, :],  # sx
         _float[:, :, :],  # v
         _float[:, :, :],  # v_max
-        _float,  # w
-        _float,  # c1
-        _float,  # c2
+        _float[:, :, :],  # w
+        _float[:, :, :],  # c1
+        _float[:, :, :],  # c2
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     "repair_out_of_bounds": nb.types.UniTuple(_float[:, :, :], 2)(
@@ -27,9 +27,9 @@ _signatures = {
         _float[:, :, :],  # v_max
         _float[:, :, :],  # lb
         _float[:, :, :],  # ub
-        _float,  # w
-        _float,  # c1
-        _float,  # c2
+        _float[:, :, :],  # w
+        _float[:, :, :],  # c1
+        _float[:, :, :],  # c2
         _int,  # iters
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
@@ -77,4 +77,4 @@ _signatures = {
 
 def jit(func: Callable) -> Callable:
     """Assigns a jit decorator to the given function with the correct signature."""
-    return nb.njit(_signatures[func.__name__])(func)
+    return nb.njit(_signatures[func.__name__], cache=True)(func)

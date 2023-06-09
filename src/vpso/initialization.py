@@ -1,8 +1,63 @@
+from numbers import Number
 from typing import Union
+
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 
-from vpso.typing import Array1d, Array3d
+from vpso.typing import Array1d, Array2d, Array3d
+
+
+def adjust_dimensions(
+    lb: Array2d,
+    ub: Array2d,
+    max_velocity_rate: Union[float, Array1d],
+    w: Union[float, Array1d],
+    c1: Union[float, Array1d],
+    c2: Union[float, Array1d],
+) -> tuple[Array3d, Array3d, int, int, Array3d, Array3d, Array3d, Array3d]:
+    """Adjusts the dimensions of the input arrays to be compatible with the vectorized
+    algorithm, i.e., adds dimensions when necessary or converts to array.
+
+    lb : 2d array
+        Lower bound of the search space. An array of shape `(N, d)`.
+    ub : 2d array
+        Upper bound of the search space. An array of shape `(N, d)`.
+    max_velocity_rate : float or array, optional
+        Maximum velocity rate used to initialize the particles. By default, `0.2`. Can
+        also be an 1d array_like of shape `(N,)` to specify a different value for each
+        of the `N` vectorized problems.
+    w : float, optional
+        Inertia weight. By default, `0.9`. Can
+        also be an 1d array_like of shape `(N,)` to specify a different value for each
+        of the `N` vectorized problems.
+    c1 : float, optional
+        Cognitive weight. By default, `2.0`. Can also be an 1d array_like of shape
+        `(N,)` to specify a different value for each of the `N` vectorized problems.
+    c2 : float, optional
+        Social weight. By default, `2.0`. Can also be an 1d array_like of shape `(N,)`
+        to specify a different value for each of the `N` vectorized problems.
+
+    Returns
+    -------
+    tuple of (3d array, 3d array, int, int, 3d array, 3d array, 3d array, 3d array)
+        Returns the `lb`, `ub`, `nvec`, `dim`, `max_velocity_rate`, `w`, `c1`, and `c2`.
+    """
+    lb = np.expand_dims(lb, 1)  # add swarm dimension
+    ub = np.expand_dims(ub, 1)  # add swarm dimension
+    nvec, _, dim = lb.shape
+    if isinstance(max_velocity_rate, Number):
+        max_velocity_rate = np.full(nvec, max_velocity_rate)
+    max_velocity_rate = np.reshape(max_velocity_rate, (nvec, 1, 1))
+    if isinstance(w, Number):
+        w = np.full(nvec, w)
+    w = np.reshape(w, (nvec, 1, 1))
+    if isinstance(c1, Number):
+        c1 = np.full(nvec, c1)
+    c1 = np.reshape(c1, (nvec, 1, 1))
+    if isinstance(c2, Number):
+        c2 = np.full(nvec, c2)
+    c2 = np.reshape(c2, (nvec, 1, 1))
+    return lb, ub, nvec, dim, max_velocity_rate, w, c1, c2
 
 
 def initialize_particles(
@@ -11,7 +66,7 @@ def initialize_particles(
     dim: int,
     lb: Array3d,
     ub: Array3d,
-    max_velocity_rate: Union[float, Array1d],
+    max_velocity_rate: Array3d,
     lhs_sampler: LatinHypercube,
     np_random: np.random.Generator,
 ) -> tuple[Array3d, Array3d, Array3d]:
@@ -29,8 +84,9 @@ def initialize_particles(
         Lower bound of the search space. An array of shape `(N, 1, d)`.
     ub : 3d array
         Upper bound of the search space. An array of shape `(N, 1, d)`.
-    max_velocity_rate : float or 1d array
-        The maximum velocity rate (proportional to the search domain size).
+    max_velocity_rate : 3d array
+        The maximum velocity rate (proportional to the search domain size) for each
+        problem. An array of shape `(N, 1, 1)`.
     seed : int, optional
         Random seed.
 
@@ -46,8 +102,6 @@ def initialize_particles(
         swarmsize, nvec, dim
     ).transpose((1, 0, 2))
 
-    if not isinstance(max_velocity_rate, np.ndarray):
-        max_velocity_rate = np.full(nvec, max_velocity_rate)
-    v_max = max_velocity_rate[:, np.newaxis, np.newaxis] * domain
+    v_max = max_velocity_rate * domain
     v = np_random.uniform(0, v_max, (nvec, swarmsize, dim))
     return x, v, v_max

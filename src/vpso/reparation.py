@@ -16,9 +16,9 @@ def repair_out_of_bounds(
     v_max: Array3d,
     lb: Array3d,
     ub: Array3d,
-    w: float,
-    c1: float,
-    c2: float,
+    w: Array3d,
+    c1: Array3d,
+    c2: Array3d,
     iters: int,
     np_random: np.random.Generator,
 ) -> tuple[Array3d, Array3d]:
@@ -47,12 +47,15 @@ def repair_out_of_bounds(
         Lower bound of the search space. An array of shape `(N, 1, d)`.
     ub : 3d array
         Upper bound of the search space. An array of shape `(N, 1, d)`.
-    w : float
-        Inertia weight.
-    c1 : float
-        Cognitive weight.
-    c2 : float
-        Social weight.
+    w : 3d array
+        Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c1 : 3d array
+        Cognitive weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c2 : 3d array
+        Social weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
     iters : int
         Number of iterations to try to repair the particles before random sampling.
     np_random : np.random.Generator

@@ -19,9 +19,9 @@ def generate_offsprings(
     ub: Array3d,
     nvec: int,
     dim: int,
-    w: float,
-    c1: float,
-    c2: float,
+    w: Array3d,
+    c1: Array3d,
+    c2: Array3d,
     repair_iters: int,
     perturb_best: bool,
     mutation_prob: float,
@@ -53,12 +53,15 @@ def generate_offsprings(
         Number of vectorized problems.
     dim : int
         Dimensionality of the problem.
-    w : float
-        Inertia weight.
-    c1 : float
-        Cognitive weight.
-    c2 : float
-        Social weight.
+    w : 3d array
+        Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c1 : 3d array
+        Cognitive weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
+    c2 : 3d array
+        Social weight. An array of shape `(N, 1, 1)`, where each element is used for
+        the corresponding problem.
     repair_iters : int
         Number of iterations to try to repair the particles before random sampling.
     perturb_best : bool
