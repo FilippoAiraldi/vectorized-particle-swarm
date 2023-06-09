@@ -65,7 +65,9 @@ def repair_out_of_bounds(
     """
     lmask = x_new < lb
     umask = x_new > ub
-    if not lmask.any() and not umask.any():
+    any_lmask = lmask.any()
+    any_umask = umask.any()
+    if not any_lmask and not any_umask:
         return x_new, v_new
 
     for _ in range(iters):
