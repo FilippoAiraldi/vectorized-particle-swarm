@@ -86,7 +86,7 @@ def batch_squareform(D: Array2d) -> Array2d:
     return out
 
 
-# @jit
+@jit
 def pso_equation(
     x: Array3d,
     px: Array3d,
@@ -140,4 +140,4 @@ def pso_equation(
 
     v_new = np.clip(inerta + cognitive + social, -v_max, v_max)
     x_new = x + v_new
-    return x_new, v_new
+    return x_new, v_new  # type: ignore[return-value]  # thinks it's a bool array...
