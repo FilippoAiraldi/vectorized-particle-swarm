@@ -48,7 +48,7 @@ class TestMath(unittest.TestCase):
         c1 = np_random.uniform()
         c2 = np_random.uniform()
 
-        def original_pso_eq(X, P_X, S_X, V, V_max, w, c1, c2, r1, r2):
+        def original_implementation(X, P_X, S_X, V, V_max, w, c1, c2, r1, r2):
             inerta = w * V
             cognitive = c1 * r1 * (P_X - X)
             social = c2 * r2 * (S_X - X)
@@ -59,7 +59,7 @@ class TestMath(unittest.TestCase):
 
         x_new_, v_new_ = [], []
         for i in range(nvec):
-            o = original_pso_eq(
+            o = original_implementation(
                 x[i], px[i], sx[i], v[i], v_max[i], w, c1, c2, r1[i], r2[i]
             )
             x_new_.append(o[0])
