@@ -33,7 +33,16 @@ _signatures = {
         _int,  # iters
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
-    "polynomial_mutation": nb.types.void(
+    "polynomial_mutation": _float[:, :](
+        _float[:, :],  # x_best
+        nb.bool_[:, :],  # mutation_mask
+        _float[:, :],  # lb
+        _float[:, :],  # ub
+        _int,  # nvec
+        _int,  # dim
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
+    "mutate": nb.types.void(
         _float[:, :, :],  # x
         _float[:, :, :],  # px
         _float[:, :],  # pf

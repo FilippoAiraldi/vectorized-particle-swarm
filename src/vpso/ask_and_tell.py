@@ -2,7 +2,7 @@ import numpy as np
 
 from vpso.jit import jit
 from vpso.math import pso_equation
-from vpso.mutation import polynomial_mutation
+from vpso.mutation import mutate
 from vpso.reparation import repair_out_of_bounds
 from vpso.typing import Array2d, Array3d
 
@@ -78,7 +78,5 @@ def generate_offsprings(
         x, x_new, v_new, px, sx, v, v_max, lb, ub, w, c1, c2, repair_iters, np_random
     )
     if perturb_best:
-        polynomial_mutation(
-            x_new, px, pf, lb, ub, nvec, dim, mutation_prob, np_random
-        )
+        mutate(x_new, px, pf, lb, ub, nvec, dim, mutation_prob, np_random)
     return x_new, v_new
