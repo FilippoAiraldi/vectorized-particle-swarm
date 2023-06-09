@@ -33,18 +33,20 @@ class TestMath(unittest.TestCase):
         np.testing.assert_allclose(actual, expected)
 
     def test_pso_equation(self):
+        seed = np.random.randint(0, 1000)
         nvec, dim = np.random.randint(3, 10, size=2)
         swarmsize = np.random.randint(1000, 2000)
-        x = np.random.randn(nvec, swarmsize, dim)
-        px = np.random.randn(nvec, swarmsize, dim)
-        sx = np.random.randn(nvec, 1, dim)
-        v = np.random.randn(nvec, swarmsize, dim)
-        v_max = np.random.randn(nvec, 1, dim)
-        w = np.random.rand()
-        c1 = np.random.rand()
-        c2 = np.random.rand()
-        r1 = np.random.rand(nvec, swarmsize, dim)
-        r2 = np.random.rand(nvec, swarmsize, dim)
+        np_random = np.random.Generator(np.random.PCG64(seed))
+        r1 = np_random.uniform(size=(nvec, swarmsize, dim))
+        r2 = np_random.uniform(size=(nvec, swarmsize, dim))
+        x = np_random.normal(size=(nvec, swarmsize, dim))
+        px = np_random.normal(size=(nvec, swarmsize, dim))
+        sx = np_random.normal(size=(nvec, 1, dim))
+        v = np_random.normal(size=(nvec, swarmsize, dim))
+        v_max = np_random.normal(size=(nvec, 1, dim))
+        w = np_random.uniform()
+        c1 = np_random.uniform()
+        c2 = np_random.uniform()
 
         def original_pso_eq(X, P_X, S_X, V, V_max, w, c1, c2, r1, r2):
             inerta = w * V
@@ -64,7 +66,8 @@ class TestMath(unittest.TestCase):
             v_new_.append(o[1])
         x_new_, v_new_ = np.asarray(x_new_), np.asarray(v_new_)
 
-        x_new, v_new = pso_equation(x, px, sx, v, v_max, w, c1, c2, None, r1, r2)
+        np_random = np.random.Generator(np.random.PCG64(seed))
+        x_new, v_new = pso_equation(x, px, sx, v, v_max, w, c1, c2, np_random)
 
         np.testing.assert_allclose(x_new, x_new_)
         np.testing.assert_allclose(v_new, v_new_)

@@ -16,8 +16,6 @@ _signatures = {
         _float,  # c1
         _float,  # c2
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
-        nb.types.Omitted(nb.types.none),  # r1
-        nb.types.Omitted(nb.types.none),  # r2
     ),
     "repair_out_of_bounds": nb.types.UniTuple(_float[:, :, :], 2)(
         _float[:, :, :],  # x
