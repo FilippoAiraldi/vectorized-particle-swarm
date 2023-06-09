@@ -27,7 +27,7 @@ def polynomial_mutation(
     px : 3d array
         Best positions of the particles so far. An array of shape `(N, M, d)`.
     pf : 2d array
-        Best values of the particles so far. An array of shape `(N, M, d)`.
+        Best values of the particles so far. An array of shape `(N, M)`.
     lb : 3d array
         Lower bound of the search space. An array of shape `(N, 1, d)`.
     ub : 3d array
