@@ -1,4 +1,5 @@
 from typing import Optional
+
 import numpy as np
 from scipy.spatial.distance import (
     _copy_array_if_base_present,
