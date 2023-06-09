@@ -15,8 +15,8 @@ def polynomial_mutation(
     dim: int,
     mutation_prob: float,
     np_random: np.random.Generator,
-) -> Array3d:
-    """Mutates the best particle of each problem with a polynomial mutation.
+) -> None:
+    """Mutates in-place the best particle of each problem with a polynomial mutation.
 
     Parameters
     ----------
@@ -40,11 +40,6 @@ def polynomial_mutation(
         Probability of applying the mutation.
     np_random : np.random.Generator
         Random number generator.
-
-    Returns
-    -------
-    3d array
-        The positions of the particles including the possibly mutated best.
     """
     # get the mutation mask for each vectorized problem, and for each dimension
     mutation_mask = np.logical_and(
@@ -52,7 +47,7 @@ def polynomial_mutation(
         np_random.random((nvec, dim)) <= min(0.5, 1 / dim),
     )
     if not mutation_mask.any():
-        return x
+        return
 
     # pick the best particle from each problem as target for mutation
     k = pf.argmin(1)
@@ -79,4 +74,3 @@ def polynomial_mutation(
     )
     for i, j in enumerate(k):
         x[i, j] = x_mutated[i]
-    return x

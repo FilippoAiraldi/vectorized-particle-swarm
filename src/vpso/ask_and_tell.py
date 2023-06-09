@@ -78,7 +78,7 @@ def generate_offsprings(
         x, x_new, v_new, px, sx, v, v_max, lb, ub, w, c1, c2, repair_iters, np_random
     )
     if perturb_best:
-        x_new = polynomial_mutation(
+        polynomial_mutation(
             x_new, px, pf, lb, ub, nvec, dim, mutation_prob, np_random
         )
     return x_new, v_new
