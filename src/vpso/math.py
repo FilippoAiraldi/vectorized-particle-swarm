@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 from scipy.spatial.distance import (
     _copy_array_if_base_present,
@@ -97,6 +98,8 @@ def pso_equation(
     c1: float,
     c2: float,
     np_random: np.random.Generator,
+    r1: Optional[Array3d] = None,
+    r2: Optional[Array3d] = None,
 ) -> tuple[Array3d, Array3d]:
     """Computes the new positions and velocities of particles in a PSO algorithm.
 
@@ -122,18 +125,24 @@ def pso_equation(
         Social weight.
     np_random : np.random.Generator
         Random number generator.
+    r1 : 3d array, optional
+        Random numbers in [0, 1]. An array of shape `(N, M, d)`. If not provided, it is
+        generated automatically. Scales the cognitive component.
+    r2 : 3d array, optional
+        Random numbers in [0, 1]. An array of shape `(N, M, d)`. If not provided, it is
+        generated automatically. Scales the social component.
 
     Returns
     -------
     tuple of 3d arrays
         New positions and velocities of the particles.
     """
-    r1 = np_random.random(x.shape)
-    r2 = np_random.random(x.shape)
+    r1_ = np_random.random(x.shape) if r1 is None else r1
+    r2_ = np_random.random(x.shape) if r2 is None else r2
 
     inerta = w * v
-    cognitive = c1 * r1 * (px - x)
-    social = c2 * r2 * (sx - x)
+    cognitive = c1 * r1_ * (px - x)
+    social = c2 * r2_ * (sx - x)
 
     v_new = np.clip(inerta + cognitive + social, -v_max, v_max)
     x_new = x + v_new
