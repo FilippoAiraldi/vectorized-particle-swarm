@@ -53,6 +53,12 @@ _signatures = {
         _float,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
+    "advance_population": nb.types.Tuple((_float[:, :, :], _float[:, :]))(
+        _float[:, :, :],  # x
+        _float[:, :],  # f
+        _float[:, :, :],  # px
+        _float[:, :],  # pf
+    ),
     "generate_offsprings": nb.types.UniTuple(_float[:, :, :], 2)(
         _float[:, :, :],  # x
         _float[:, :, :],  # px

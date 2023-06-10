@@ -5,7 +5,7 @@ from numpy.typing import ArrayLike
 from scipy.stats.qmc import LatinHypercube
 
 from vpso.adaptation import adapt
-from vpso.ask_and_tell import generate_offsprings
+from vpso.ask_and_tell import advance_population, generate_offsprings, get_best
 from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
 
@@ -101,10 +101,10 @@ def vpso(
         nvec, swarmsize, dim, lb, ub, max_velocity_rate, lhs_sampler, np_random
     )
 
-    # initialize other quantities
+    # initialize particle's best pos/value and global best
     px = x  # particle's best position
     pf = np.reshape(func(x), (nvec, swarmsize))  # particle's best value
-    sx = x[np.arange(nvec), np.newaxis, pf.argmin(1)]  # (social/global) best particle
+    sx, sf = get_best(px, pf, nvec)  # social/global best position/value
 
     # main optimization loop
     for _ in range(maxiter):
@@ -127,20 +127,11 @@ def vpso(
             mutation_prob,
             np_random,
         )
-
-        # evaluate new particles (cannot be jitted)
-        f = np.reshape(func(x), (nvec, swarmsize))
-
-        # TODO: implement advance
-        # improve population
-        # improvement_mask = f < pf
-        # px = np.where(improvement_mask, x, px)
-        # pf = np.where(improvement_mask, f, pf)
-
-        # adapt
+        f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
+        px, pf = advance_population(x, f, px, pf)
         if adaptive:
             w, c1, c2 = adapt(
-                px,  # TODO: understand if this is equivalent to pop
+                px,
                 sx,
                 swarmsize,
                 lb,
@@ -150,10 +141,8 @@ def vpso(
                 c2,
                 np_random,
             )
-
-        # update social best (# TODO: here, after, or before? w.r.t. adapt, termination, etc.)
-        # sx
+        sx, sf = get_best(px, pf, nvec)
 
         # check termination conditions
 
-    raise NotImplementedError
+    return sx[:, 0], sf

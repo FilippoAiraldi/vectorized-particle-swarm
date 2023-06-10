@@ -4,7 +4,7 @@ from vpso.jit import jit
 from vpso.math import pso_equation
 from vpso.mutation import mutate
 from vpso.reparation import repair_out_of_bounds
-from vpso.typing import Array2d, Array3d
+from vpso.typing import Array1d, Array2d, Array3d
 
 
 @jit
@@ -83,3 +83,60 @@ def generate_offsprings(
     if perturb_best:
         mutate(x_new, px, pf, lb, ub, nvec, dim, mutation_prob, np_random)
     return x_new, v_new
+
+
+@jit
+def advance_population(
+    x: Array3d, f: Array2d, px: Array3d, pf: Array2d
+) -> tuple[Array3d, Array2d]:
+    """Advances the population by replacing the particles with better positions.
+
+    Parameters
+    ----------
+    x : 3d array
+        Current positions of the particles. An array of shape `(N, M, d)`, where `N` is
+        the number of vectorized problems to solve simultaneously, `M` is the number of
+        particles in the swarm, and `d` is the dimension of the search space.
+    f : 2d array
+        Current values of the particles. An array of shape `(N, M)`.
+    px : 3d array
+        Best positions of the particles so far. An array of shape `(N, M, d)`.
+    pf : 2d array
+        Best values of the particles so far. An array of shape `(N, M)`.
+
+    Returns
+    -------
+    tuple of 3d and 2d arrays
+        Returns the new positions and values of the best particles.
+    """
+    improvement_mask = f < pf
+    px = np.where(improvement_mask[:, :, np.newaxis], x, px)
+    pf = np.where(improvement_mask, f, pf)
+    return px, pf
+
+
+def get_best(px: Array3d, pf: Array2d, nvec: int) -> tuple[Array3d, Array1d]:
+    """Returns the best particle and its value for each problem.
+
+    Parameters
+    ----------
+    px : 3d array
+        Best positions of the particles so far. An array of shape `(N, M, d)`, where `N`
+        is the number of vectorized problems to solve simultaneously, `M` is the number
+        of particles in the swarm, and `d` is the dimension of the search space.
+    pf : 2d array
+        Best values of the particles so far. An array of shape `(N, M)`.
+    nvec : int
+        Number of vectorized problems.
+
+    Returns
+    -------
+    tuple of 3d and 1d arrays
+        The best particle and its value for each problem with shape `(N, 1, d)` and
+        `(N,)`, respectively.
+    """
+    idx = np.arange(nvec)
+    k = pf.argmin(1)
+    sx = px[idx, np.newaxis, k]  # (social/global) best particle
+    sf = pf[idx, k]  # (social/global) best value
+    return sx, sf
