@@ -9,13 +9,6 @@ from vpso.ask_and_tell import advance_population, generate_offsprings, get_best
 from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
 
-# def _improve_population(
-#     x: Array, f: Array, px: Array, pf: Array, sx: Array, adaptive: bool
-# ):
-#     improvement_mask = f < pf
-#     px = np.where(improvement_mask, x, px)
-#     pf = np.where(improvement_mask, f, pf)
-
 
 def vpso(
     func: Callable[[Array3d], ArrayLike],
