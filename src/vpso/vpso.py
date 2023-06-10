@@ -4,7 +4,6 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.stats.qmc import LatinHypercube
 
-from vpso.adaptive import adapt
 from vpso.ask_and_tell import generate_offsprings
 from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
