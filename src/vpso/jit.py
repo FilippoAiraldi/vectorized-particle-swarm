@@ -1,7 +1,3 @@
-import os
-
-os.environ["NUMBA_DISABLE_JIT"] = "0"
-
 from typing import Callable
 
 import numba as nb
