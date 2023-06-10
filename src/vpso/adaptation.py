@@ -23,8 +23,8 @@ def adaptation_strategy(f: Array1d) -> Array2d:
 
     Parameters
     ----------
-    f : 3d array
-        Array of shape `(N, 1, 1)`.
+    f : 1d array
+        Array of shape `N`.
 
     Returns
     -------
@@ -38,7 +38,7 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     # NOTE: fails in numba's npython mode
     # deltas = np.full((f.size, 2), (-1.0, 1.0), dtype=f.dtype)  # initialize all to S4
     deltas = np.full((f.size, 2), -1.0)  # initialize all to S4 (fill in two steps)
-    deltas[:, 0].fill(1.0)
+    deltas[:, 1].fill(1.0)
 
     deltas = np.where(f <= 23 / 30, [(1.0, -1.0)], deltas)  # S1
     deltas = np.where(f < 0.5, [(0.5, -0.5)], deltas)  # S2
