@@ -112,7 +112,7 @@ def adapt(
     ----------
     px : 3d array
         Best positions of the particles so far. An array of shape `(N, M, d)`.
-    sx : 2d array
+    sx : 3d array
         Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
     swarmsize : int
         Number of particles in the swarm.

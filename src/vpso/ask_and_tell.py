@@ -39,7 +39,7 @@ def generate_offsprings(
         Best positions of the particles so far. An array of shape `(N, M, d)`.
     pf : 2d array
         Best values of the particles so far. An array of shape `(N, M)`.
-    sx : 2d array
+    sx : 3d array
         Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
     v : 3d array
         Current velocities of the particles. An array of shape `(N, M, d)`.
