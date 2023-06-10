@@ -53,7 +53,7 @@ class TestMath(unittest.TestCase):
             cognitive = c1 * r1 * (P_X - X)
             social = c2 * r2 * (S_X - X)
             Vp = inerta + cognitive + social
-            Vp = np.clip(Vp, -V_max, V_max)
+            Vp = Vp.clip(-V_max, V_max)
             Xp = X + Vp
             return Xp, Vp
 

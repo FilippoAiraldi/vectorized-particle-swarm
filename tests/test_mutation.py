@@ -69,7 +69,7 @@ class TestMutation(unittest.TestCase):
             val = 2.0 * (1.0 - rand) + 2.0 * (rand - 0.5) * (np.power(xy, (eta + 1.0)))
             d = 1.0 - (np.power(val, mut_pow))
             deltaq[mask_not] = d[mask_not]
-            return np.clip(X + deltaq * (ub - lb), lb, ub)
+            return (X + deltaq * (ub - lb)).clip(lb, ub)
 
         np_random = np.random.Generator(np.random.PCG64(seed))
         eta = np_random.uniform(5, 30, size=nvec)

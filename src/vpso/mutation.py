@@ -49,7 +49,7 @@ def polynomial_mutation(
     val2 = np.power(2.0 * (1.0 - R) + 2.0 * (R - 0.5) * xy2, mut_pow)
     deltaq = np.where(R <= 0.5, val1 - 1.0, 1.0 - val2)
 
-    return np.clip(np.where(mutation_mask, x_best + deltaq * domain, x_best), lb, ub)
+    return np.where(mutation_mask, x_best + deltaq * domain, x_best).clip(lb, ub)
 
 
 @jit

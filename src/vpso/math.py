@@ -138,6 +138,6 @@ def pso_equation(
     cognitive = c1 * r1 * (px - x)
     social = c2 * r2 * (sx - x)
 
-    v_new = np.clip(inerta + cognitive + social, -v_max, v_max)
+    v_new = (inerta + cognitive + social).clip(-v_max, v_max)
     x_new = x + v_new
     return x_new, v_new  # type: ignore[return-value]  # thinks it's a bool array...
