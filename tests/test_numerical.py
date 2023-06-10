@@ -1,7 +1,10 @@
 # import unittest
 
 # import numpy as np
+# from pymoo.algorithms.soo.nonconvex.pso import PSO
+# from pymoo.optimize import minimize
 # from pymoo.problems.single import Ackley
+# from pymoo.termination.default import DefaultSingleObjectiveTermination
 
 # from vpso import vpso
 
@@ -11,19 +14,19 @@
 #         np.random.seed(17)
 
 #         pop_size = np.random.randint(10, 50)
-#         np.random.uniform(1e-8, 1e-2)
-#         np.random.randint(100, 1000)
-#         np.random.randint(1, 30)
+#         ftol = np.random.uniform(1e-8, 1e-2)
+#         n_max_gen = np.random.randint(100, 1000)
+#         period = np.random.randint(1, 30)
 #         problem = Ackley()
-#         # res = minimize(
-#         #     problem,
-#         #     PSO(pop_size=pop_size),
-#         #     termination=DefaultSingleObjectiveTermination(
-#         #         ftol=ftol, n_max_gen=n_max_gen, period=period
-#         #     ),
-#         #     verbose=False,
-#         #     seed=49,
-#         # )
+#         res = minimize(
+#             problem,
+#             PSO(pop_size=pop_size),
+#             termination=DefaultSingleObjectiveTermination(
+#                 ftol=ftol, n_max_gen=n_max_gen, period=period
+#             ),
+#             verbose=False,
+#             seed=49,
+#         )
 
 #         nvec = 3
 #         res_ = vpso(
