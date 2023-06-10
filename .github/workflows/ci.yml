@@ -34,7 +34,7 @@ jobs:
       - name: Coverage with Code Climate
         uses: paambaati/codeclimate-action@v4.0.0
         # send report only when jit is disabled, and for python 3.11
-        if: ${{ matrix.DISABLE_JIT == 1 && matrix.python-version == '3.11' }}
+        if: ${{ matrix.DISABLE_JIT == 1 }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPORTER_ID }}
         with:
