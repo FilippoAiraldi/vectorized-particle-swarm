@@ -4,6 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 from scipy.stats.qmc import LatinHypercube
 
+from vpso.adaptation import adapt
 from vpso.ask_and_tell import generate_offsprings
 from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
@@ -135,6 +136,20 @@ def vpso(
         # improvement_mask = f < pf
         # px = np.where(improvement_mask, x, px)
         # pf = np.where(improvement_mask, f, pf)
+
+        # adapt
+        if adaptive:
+            w, c1, c2 = adapt(
+                px,  # TODO: understand if this is equivalent to pop
+                sx,
+                swarmsize,
+                lb,
+                ub,
+                w,
+                c1,
+                c2,
+                np_random,
+            )
 
         # update social best (# TODO: here, after, or before? w.r.t. adapt, termination, etc.)
         # sx

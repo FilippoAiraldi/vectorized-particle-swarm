@@ -72,6 +72,14 @@ _signatures = {
         _float,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
+    "adaptation_strategy": _float[:, :](_float[:]),
+    "perform_adaptation": nb.types.UniTuple(_float[:, :, :], 3)(
+        _float[:, :, :],  # w
+        _float[:, :, :],  # c1
+        _float[:, :, :],  # c2
+        _float[:],  # stage
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
 }
 
 
