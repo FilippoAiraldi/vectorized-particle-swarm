@@ -19,8 +19,11 @@ class TestMutation(unittest.TestCase):
         lb = -np.abs(np_random.normal(size=(nvec, 1, dim))) - 10
         x_mutated = np_random.uniform(lb, ub, (nvec, swarmsize, dim))
         x_original = x_mutated.copy()
+        px = np_random.uniform(lb, ub, (nvec, swarmsize, dim))
+        pf = np_random.uniform(size=(nvec, swarmsize))
+        mutation_prob = 0.0
 
-        mutate(x_mutated, None, None, None, None, nvec, dim, 0.0, np_random)
+        mutate(x_mutated, px, pf, lb, ub, nvec, dim, mutation_prob, np_random)
         np.testing.assert_array_equal(x_original, x_mutated)
 
     def test_mutate__performs_mutation(self):

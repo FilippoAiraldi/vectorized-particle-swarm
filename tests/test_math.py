@@ -44,9 +44,9 @@ class TestMath(unittest.TestCase):
         sx = np_random.normal(size=(nvec, 1, dim))
         v = np_random.normal(size=(nvec, swarmsize, dim))
         v_max = np_random.normal(size=(nvec, 1, dim))
-        w = np_random.uniform()
-        c1 = np_random.uniform()
-        c2 = np_random.uniform()
+        w = np_random.uniform(size=(nvec, 1, 1))
+        c1 = np_random.uniform(size=(nvec, 1, 1))
+        c2 = np_random.uniform(size=(nvec, 1, 1))
 
         def original_implementation(X, P_X, S_X, V, V_max, w, c1, c2, r1, r2):
             inerta = w * V
@@ -60,7 +60,7 @@ class TestMath(unittest.TestCase):
         x_new_, v_new_ = [], []
         for i in range(nvec):
             o = original_implementation(
-                x[i], px[i], sx[i], v[i], v_max[i], w, c1, c2, r1[i], r2[i]
+                x[i], px[i], sx[i], v[i], v_max[i], w[i], c1[i], c2[i], r1[i], r2[i]
             )
             x_new_.append(o[0])
             v_new_.append(o[1])

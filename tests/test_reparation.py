@@ -17,24 +17,34 @@ class TestReparation(unittest.TestCase):
         swarmsize = np_random.integers(1000, 2000)
         ub = np.abs(np_random.normal(size=(nvec, 1, dim))) + 10
         lb = -np.abs(np_random.normal(size=(nvec, 1, dim))) - 10
+        x = np_random.uniform(lb, ub, (nvec, swarmsize, dim))
         x_new = np_random.uniform(lb + 0.1, ub - 0.1, (nvec, swarmsize, dim))
         v_new = np_random.uniform(size=(nvec, swarmsize, dim))
+        px = np_random.uniform(lb, ub, (nvec, swarmsize, dim))
+        sx = np_random.uniform(lb, ub, (nvec, 1, dim))
+        v = np_random.uniform(size=(nvec, swarmsize, dim))
+        v_max = np_random.uniform(size=(nvec, 1, dim))
+        w = np_random.uniform(size=(nvec, 1, 1))
+        c1 = np_random.uniform(size=(nvec, 1, 1))
+        c2 = np_random.uniform(size=(nvec, 1, 1))
+
         x_new_, v_new_ = repair_out_of_bounds(
-            None,
+            x,
             x_new,
             v_new,
-            None,
-            None,
-            None,
-            None,
+            px,
+            sx,
+            v,
+            v_max,
             lb,
             ub,
-            None,
-            None,
-            None,
-            None,
+            w,
+            c1,
+            c2,
+            200,
             np_random,
         )
+
         np.testing.assert_array_equal(x_new_, x_new)
         np.testing.assert_array_equal(v_new_, v_new)
 
@@ -52,7 +62,9 @@ class TestReparation(unittest.TestCase):
         sx = np_random.uniform(lb, ub, (nvec, 1, dim))
         v = np_random.uniform(size=(nvec, swarmsize, dim))
         v_max = np_random.uniform(size=(nvec, 1, dim))
-        w, c1, c2 = np_random.uniform(size=3)
+        w = np_random.uniform(size=(nvec, 1, 1))
+        c1 = np_random.uniform(size=(nvec, 1, 1))
+        c2 = np_random.uniform(size=(nvec, 1, 1))
 
         x_new_, v_new_ = repair_out_of_bounds(
             x,
