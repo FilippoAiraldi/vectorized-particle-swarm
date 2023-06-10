@@ -12,6 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11"]
+        DISABLE_JIT: [0, 1]
 
     steps:
       - uses: actions/checkout@v3
@@ -29,9 +30,10 @@ jobs:
         run: |
           coverage run -m unittest discover ./tests 'test_*.py'
         env:
-          NUMBA_DISABLE_JIT: 1
+          NUMBA_DISABLE_JIT: ${{ matrix.DISABLE_JIT }}
       - name: Coverage with Code Climate
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v4.0.0
+        if: ${{ matrix.DISABLE_JIT == 1 }}  # send report only when jit is disabled
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CODECLIMATE_REPORTER_ID }}
         with:
