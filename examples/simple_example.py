@@ -14,6 +14,10 @@ References
 """
 
 
+import os
+
+os.environ["NUMBA_DISABLE_JIT"] = "1"
+
 import logging
 
 import numpy as np
@@ -50,6 +54,7 @@ x_opt, f_opt, _ = vpso(
     lb=-bounds,
     ub=+bounds,
     verbosity=logging.DEBUG,
+    seed=1909,
 )
 
 

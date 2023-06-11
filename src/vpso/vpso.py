@@ -138,6 +138,9 @@ def vpso(
         )
         f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
         px, pf = advance_population(x, f, px, pf)
+        sx, sf = get_best(px, pf, nvec)
+        logger.debug("best values at iteration %i ∈ [%e, %e]", i, sf.min(), sf.max())
+
         if adaptive:
             w, c1, c2 = adapt(
                 px,
@@ -150,8 +153,6 @@ def vpso(
                 c2,
                 np_random,
             )
-        sx, sf = get_best(px, pf, nvec)
-        logger.debug("average best at iteration %d is %e", i, sf.mean())
 
         # TODO: check termination conditions
 
