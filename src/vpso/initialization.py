@@ -1,16 +1,17 @@
 from numbers import Number
-from typing import Union
+from typing import Literal, Union
 
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 
-from vpso.typing import Array1d, Array1i, Array2d, Array3d, Array3i
+from vpso.typing import Array1d, Array1i, Array2d, Array3d
 
 
-def _as3darray(val, nvec, dtype):
+def _asarray(val, nvec, dtype, ndim: Literal[1, 3]):
     if isinstance(val, Number):
         val = np.full(nvec, val, dtype=dtype)
-    return np.reshape(val, (nvec, 1, 1)).astype(dtype, copy=False)
+    shape = (nvec, 1, 1) if ndim == 3 else (nvec,)
+    return np.reshape(val, shape).astype(dtype, copy=False)
 
 
 def adjust_dimensions(
@@ -32,9 +33,9 @@ def adjust_dimensions(
     Array3d,
     Array3d,
     Array3d,
-    Array3d,
-    Array3d,
-    Array3i,
+    Array1d,
+    Array1d,
+    Array1i,
 ]:
     """Adjusts the dimensions of the input arrays to be compatible with the vectorized
     algorithm, i.e., adds dimensions when necessary or converts to array.
@@ -72,8 +73,9 @@ def adjust_dimensions(
 
     Returns
     -------
-    tuple of (3d array, 3d array, int, int, 3d array, 3d array, 3d array, 3d array)
-        Returns the `lb`, `ub`, `nvec`, `dim`, `max_velocity_rate`, `w`, `c1`, and `c2`.
+    tuple of 3d and 1d arrays
+        Returns the `lb`, `ub`, `nvec`, `dim`, `max_velocity_rate`, `w`, `c1`, `c2`,
+        `ftol`, `xtol`, and `patience`.
     """
     lb = np.expand_dims(lb, 1)  # add swarm dimension
     ub = np.expand_dims(ub, 1)  # add swarm dimension
@@ -83,13 +85,13 @@ def adjust_dimensions(
         ub,
         nvec,
         dim,
-        _as3darray(max_velocity_rate, nvec, float),
-        _as3darray(w, nvec, float),
-        _as3darray(c1, nvec, float),
-        _as3darray(c2, nvec, float),
-        _as3darray(ftol, nvec, float),
-        _as3darray(xtol, nvec, float),
-        _as3darray(patience, nvec, int),
+        _asarray(max_velocity_rate, nvec, float, 3),
+        _asarray(w, nvec, float, 3),
+        _asarray(c1, nvec, float, 3),
+        _asarray(c2, nvec, float, 3),
+        _asarray(ftol, nvec, float, 1),
+        _asarray(xtol, nvec, float, 1),
+        _asarray(patience, nvec, int, 1),
     )
 
 
