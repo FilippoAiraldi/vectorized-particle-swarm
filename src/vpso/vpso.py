@@ -7,8 +7,9 @@ from scipy.stats.qmc import LatinHypercube
 
 from vpso.adaptation import adapt
 from vpso.ask_and_tell import advance_population, generate_offsprings, get_best
-from vpso.initialization import adjust_dimensions, initialize_particles
-from vpso.typing import Array1d, Array2d, Array3d
+from vpso.initialization import adjust_dimensions as adj_dim
+from vpso.initialization import initialize_particles
+from vpso.typing import Array1d, Array1i, Array2d, Array3d
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +30,10 @@ def vpso(
     mutation_prob: float = 0.9,
     adaptive: bool = True,
     #
-    maxiter: int = 300,
+    maxiter: int = 300,  # could be an array, but only the max would be then used
     ftol: Union[float, Array1d] = 1e-8,
     xtol: Union[float, Array1d] = 1e-8,
-    patience: int = 10,
+    patience: Union[int, Array1i] = 1,
     #
     seed: Optional[int] = None,
     verbosity: int = logging.WARNING,
@@ -54,18 +55,18 @@ def vpso(
         Upper bound of the search space. An array of shape `(N, d)`.
     swarmsize : int, optional
         Number of particles in the swarm to solve each problem. By default, `25`.
-    max_velocity_rate : float or array, optional
+    max_velocity_rate : float or array_like, optional
         Maximum velocity rate used to initialize the particles. By default, `0.2`. Can
         also be an 1d array_like of shape `(N,)` to specify a different value for each
         of the `N` vectorized problems.
-    w : float or 1d array, optional
+    w : float or 1d array_like, optional
         Inertia weight. By default, `0.9`. Can
         also be an 1d array_like of shape `(N,)` to specify a different value for each
         of the `N` vectorized problems.
-    c1 : float or 1d array, optional
+    c1 : float or 1d array_like, optional
         Cognitive weight. By default, `2.0`. Can also be an 1d array_like of shape
         `(N,)` to specify a different value for each of the `N` vectorized problems.
-    c2 : float or 1d array, optional
+    c2 : float or 1d array_like, optional
         Social weight. By default, `2.0`. Can also be an 1d array_like of shape `(N,)`
         to specify a different value for each of the `N` vectorized problems.
     repair_iters : int, optional
@@ -79,8 +80,20 @@ def vpso(
         default, `0.9`. Only used if `perturb_best=True`.
     adaptive : bool, optional
         Whether to adapt the weights at each iteration. By default, `True`.
-    maxiter : int, optional
+    maxiter : int , optional
         Maximum number of iterations to run the optimization for. By default, `300`.
+    ftol : float or 1d array_like of floats, optional
+        Tolerance for changes in the objective function value before terminating the
+        solver. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1e-8`.
+    xtol : float or 1d array_like of floats, optional
+        Tolerance for average changes in the objective minimizer before terminating the
+        solver. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1e-8`.
+    patience : int or 1d array_like of ints, optional
+        Number of iterations to wait before terminating the solver if no improvement is
+        witnessed. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1`.
     seed : int, optional
         Seed for the random number generator. By default, `None`.
     verbosity : int, optional
@@ -98,8 +111,8 @@ def vpso(
     logger.setLevel(verbosity)
 
     # first, adjust some dimensions
-    lb, ub, nvec, dim, max_velocity_rate, w, c1, c2 = adjust_dimensions(
-        lb, ub, max_velocity_rate, w, c1, c2
+    lb, ub, nvec, dim, max_velocity_rate, w, c1, c2, ftol, xtol, patience = adj_dim(
+        lb, ub, max_velocity_rate, w, c1, c2, ftol, xtol, patience
     )
 
     # initialize particle positions and velocities

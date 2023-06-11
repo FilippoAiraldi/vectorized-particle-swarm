@@ -4,7 +4,13 @@ from typing import Union
 import numpy as np
 from scipy.stats.qmc import LatinHypercube
 
-from vpso.typing import Array1d, Array2d, Array3d
+from vpso.typing import Array1d, Array1i, Array2d, Array3d, Array3i
+
+
+def _as3darray(val, nvec, dtype):
+    if isinstance(val, Number):
+        val = np.full(nvec, val, dtype=dtype)
+    return np.reshape(val, (nvec, 1, 1)).astype(dtype, copy=False)
 
 
 def adjust_dimensions(
@@ -14,7 +20,22 @@ def adjust_dimensions(
     w: Union[float, Array1d],
     c1: Union[float, Array1d],
     c2: Union[float, Array1d],
-) -> tuple[Array3d, Array3d, int, int, Array3d, Array3d, Array3d, Array3d]:
+    ftol: Union[float, Array1d],
+    xtol: Union[float, Array1d],
+    patience: Union[int, Array1i],
+) -> tuple[
+    Array3d,
+    Array3d,
+    int,
+    int,
+    Array3d,
+    Array3d,
+    Array3d,
+    Array3d,
+    Array3d,
+    Array3d,
+    Array3i,
+]:
     """Adjusts the dimensions of the input arrays to be compatible with the vectorized
     algorithm, i.e., adds dimensions when necessary or converts to array.
 
@@ -36,6 +57,18 @@ def adjust_dimensions(
     c2 : float, optional
         Social weight. By default, `2.0`. Can also be an 1d array_like of shape `(N,)`
         to specify a different value for each of the `N` vectorized problems.
+    ftol : float or 1d array_like of floats, optional
+        Tolerance for changes in the objective function value before terminating the
+        solver. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1e-8`.
+    xtol : float or 1d array_like of floats, optional
+        Tolerance for average changes in the objective minimizer before terminating the
+        solver. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1e-8`.
+    patience : int or 1d array_like of ints, optional
+        Number of iterations to wait before terminating the solver if no improvement is
+        witnessed. Can also be an 1d array_like of shape `(N,)` to specify a different
+        value for each of the `N` vectorized problems. By default, `1`.
 
     Returns
     -------
@@ -45,19 +78,19 @@ def adjust_dimensions(
     lb = np.expand_dims(lb, 1)  # add swarm dimension
     ub = np.expand_dims(ub, 1)  # add swarm dimension
     nvec, _, dim = lb.shape
-    if isinstance(max_velocity_rate, Number):
-        max_velocity_rate = np.full(nvec, max_velocity_rate)
-    max_velocity_rate = np.reshape(max_velocity_rate, (nvec, 1, 1))
-    if isinstance(w, Number):
-        w = np.full(nvec, w)
-    w = np.reshape(w, (nvec, 1, 1))
-    if isinstance(c1, Number):
-        c1 = np.full(nvec, c1)
-    c1 = np.reshape(c1, (nvec, 1, 1))
-    if isinstance(c2, Number):
-        c2 = np.full(nvec, c2)
-    c2 = np.reshape(c2, (nvec, 1, 1))
-    return lb, ub, nvec, dim, max_velocity_rate, w, c1, c2
+    return (
+        lb,
+        ub,
+        nvec,
+        dim,
+        _as3darray(max_velocity_rate, nvec, float),
+        _as3darray(w, nvec, float),
+        _as3darray(c1, nvec, float),
+        _as3darray(c2, nvec, float),
+        _as3darray(ftol, nvec, float),
+        _as3darray(xtol, nvec, float),
+        _as3darray(patience, nvec, int),
+    )
 
 
 def initialize_particles(
