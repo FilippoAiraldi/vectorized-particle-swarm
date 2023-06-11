@@ -30,8 +30,8 @@ def vpso(
     adaptive: bool = True,
     #
     maxiter: int = 300,
-    ftol: float = 1e-8,
-    xtol: float = 1e-8,
+    ftol: Union[float, Array1d] = 1e-8,
+    xtol: Union[float, Array1d] = 1e-8,
     patience: int = 10,
     #
     seed: Optional[int] = None,
@@ -138,11 +138,11 @@ def vpso(
         )
         f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
         px, pf = advance_population(x, f, px, pf)
-        sx, sf = get_best(px, pf, nvec, logger, i)
+        sx_new, sf_new = get_best(px, pf, nvec, logger, i)
         if adaptive:
             w, c1, c2 = adapt(
                 px,
-                sx,
+                sx_new,
                 swarmsize,
                 lb,
                 ub,
@@ -153,7 +153,11 @@ def vpso(
                 logger,
             )
 
-        # TODO: check termination conditions
+        # check termination conditions
+
+        # save new best
+        sx = sx_new
+        sf = sf_new
 
     logger.info('termination due to "%s"', termination_reason)
     return sx[:, 0], sf, termination_reason
