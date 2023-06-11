@@ -37,7 +37,7 @@ class TestNumerical(unittest.TestCase):
                 [problem.evaluate(x_, return_values_of=["F"]) for x_ in x]
             )
 
-        actual_res = vpso(
+        actual_x, actual_f, _ = vpso(
             objs,
             np.tile(problem.xl, (nvec, 1)),
             np.tile(problem.xu, (nvec, 1)),
@@ -52,18 +52,18 @@ class TestNumerical(unittest.TestCase):
         pf = problem.pareto_front().item()
         ps = problem.pareto_set().squeeze()
         np.testing.assert_allclose(
-            actual_res[1], pf, atol=1e-3, rtol=1e-3, err_msg=f"f {cls.__name__}"
+            actual_f, pf, atol=1e-3, rtol=1e-3, err_msg=f"f {cls.__name__}"
         )
         if ps.ndim == 1:
             np.testing.assert_allclose(
-                *np.broadcast_arrays(actual_res[0], ps),
+                *np.broadcast_arrays(actual_x, ps),
                 atol=1e-3,
                 rtol=1e-3,
                 err_msg=f"x {cls.__name__}",
             )
         else:
             for i in range(nvec):
-                x_opt = actual_res[0][i]
+                x_opt = actual_x[i]
                 self.assertTrue(
                     any(np.allclose(x_opt, ps_, atol=1e-3, rtol=1e-3) for ps_ in ps),
                     msg=f"x {i} {cls.__name__}",

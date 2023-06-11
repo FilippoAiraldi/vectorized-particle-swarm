@@ -35,7 +35,7 @@ bounds = np.tile([32.768, 6], (n_vars, 1))
 
 
 # run the optimization
-x_opt, f_opt = vpso(
+x_opt, f_opt, _ = vpso(
     func=lambda x: [ackley(x[0]), himmelblau(x[1])],
     lb=-bounds,
     ub=+bounds,

@@ -27,9 +27,12 @@ def vpso(
     adaptive: bool = True,
     #
     maxiter: int = 300,
+    ftol: float = 1e-8,
+    xtol: float = 1e-8,
+    patience: int = 10,
     #
     seed: Optional[int] = None,
-) -> tuple[Array2d, Array1d]:
+) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
     to solve multiple optimization problems simultaneously in a vectorized fashion.
 
@@ -79,8 +82,11 @@ def vpso(
 
     Returns
     -------
-    tuple of (2d array, 1d array)
-        Returns a tuple containing the best minimizer and minimum of each problem.
+    tuple of (2d array, 1d array, str)
+        Returns a tuple containing
+         - the best minimizer of each problem
+         - the best minimum of each problem
+         - the termination reason as a string
     """
     # first, adjust some dimensions
     lb, ub, nvec, dim, max_velocity_rate, w, c1, c2 = adjust_dimensions(
@@ -100,6 +106,7 @@ def vpso(
     sx, sf = get_best(px, pf, nvec)  # social/global best position/value
 
     # main optimization loop
+    termination_status = "maxiter"
     for _ in range(maxiter):
         x, v = generate_offsprings(
             x,
@@ -136,6 +143,8 @@ def vpso(
             )
         sx, sf = get_best(px, pf, nvec)
 
-        # check termination conditions
+        # TODO: check termination conditions
 
-    return sx[:, 0], sf
+        # TODO: verbosity
+
+    return sx[:, 0], sf, termination_status
