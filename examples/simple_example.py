@@ -14,9 +14,19 @@ References
 """
 
 
+import logging
+
 import numpy as np
 
 from vpso import vpso
+
+logger = logging.getLogger()
+handler = logging.StreamHandler()
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s (%(levelname)s): %(message)s.", "%Y-%m-%d,%H:%M:%S"
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def ackley(x):
@@ -39,6 +49,7 @@ x_opt, f_opt, _ = vpso(
     func=lambda x: [ackley(x[0]), himmelblau(x[1])],
     lb=-bounds,
     ub=+bounds,
+    verbosity=logging.DEBUG,
 )
 
 

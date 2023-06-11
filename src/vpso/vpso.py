@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Optional, Union
 
 import numpy as np
@@ -8,6 +9,8 @@ from vpso.adaptation import adapt
 from vpso.ask_and_tell import advance_population, generate_offsprings, get_best
 from vpso.initialization import adjust_dimensions, initialize_particles
 from vpso.typing import Array1d, Array2d, Array3d
+
+logger = logging.getLogger(__name__)
 
 
 def vpso(
@@ -32,6 +35,7 @@ def vpso(
     patience: int = 10,
     #
     seed: Optional[int] = None,
+    verbosity: int = logging.WARNING,
 ) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
     to solve multiple optimization problems simultaneously in a vectorized fashion.
@@ -79,6 +83,9 @@ def vpso(
         Maximum number of iterations to run the optimization for. By default, `300`.
     seed : int, optional
         Seed for the random number generator. By default, `None`.
+    verbosity : int, optional
+        Verbosity level of the solver. Levels higher than `INFO` log nothig. By default,
+        `logging.WARNING` is used.
 
     Returns
     -------
@@ -88,6 +95,8 @@ def vpso(
          - the best minimum of each problem
          - the termination reason as a string
     """
+    logger.setLevel(verbosity)
+
     # first, adjust some dimensions
     lb, ub, nvec, dim, max_velocity_rate, w, c1, c2 = adjust_dimensions(
         lb, ub, max_velocity_rate, w, c1, c2
@@ -106,8 +115,8 @@ def vpso(
     sx, sf = get_best(px, pf, nvec)  # social/global best position/value
 
     # main optimization loop
-    termination_status = "maxiter"
-    for _ in range(maxiter):
+    termination_reason = "maxiter"
+    for i in range(1, maxiter + 1):
         x, v = generate_offsprings(
             x,
             px,
@@ -142,9 +151,9 @@ def vpso(
                 np_random,
             )
         sx, sf = get_best(px, pf, nvec)
+        logger.debug("average best at iteration %d is %e", i, sf.mean())
 
         # TODO: check termination conditions
 
-        # TODO: verbosity
-
-    return sx[:, 0], sf, termination_status
+    logger.info('termination due to "%s"', termination_reason)
+    return sx[:, 0], sf, termination_reason
