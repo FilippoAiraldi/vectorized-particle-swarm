@@ -1,42 +1,74 @@
-# import unittest
+import unittest
+from typing import Type
 
-# import numpy as np
-# from pymoo.algorithms.soo.nonconvex.pso import PSO
-# from pymoo.optimize import minimize
-# from pymoo.problems.single import Ackley
-# from pymoo.termination.default import DefaultSingleObjectiveTermination
+import numpy as np
+from parameterized import parameterized
+from pymoo.core.problem import Problem
+from pymoo.problems.single import (
+    Ackley,
+    Griewank,
+    Himmelblau,
+    Rastrigin,
+    Rosenbrock,
+    Schwefel,
+    Sphere,
+    Zakharov,
+)
 
-# from vpso import vpso
+from vpso import vpso
 
-
-# class TestNumerical(unittest.TestCase):
-#     def test_against_pymoo(self):
-#         np.random.seed(17)
-
-#         pop_size = np.random.randint(10, 50)
-#         ftol = np.random.uniform(1e-8, 1e-2)
-#         n_max_gen = np.random.randint(100, 1000)
-#         period = np.random.randint(1, 30)
-#         problem = Ackley()
-#         res = minimize(
-#             problem,
-#             PSO(pop_size=pop_size),
-#             termination=DefaultSingleObjectiveTermination(
-#                 ftol=ftol, n_max_gen=n_max_gen, period=period
-#             ),
-#             verbose=False,
-#             seed=49,
-#         )
-
-#         nvec = 3
-#         res_ = vpso(
-#             lambda x: np.asarray([problem.evaluate(x_) for x_ in x]),
-#             np.tile(problem.xl, (nvec, 1)),
-#             np.tile(problem.xu, (nvec, 1)),
-#             swarmsize=pop_size,
-#             seed=49,
-#         )
+CLS = [Ackley, Griewank, Himmelblau, Rastrigin, Rosenbrock, Schwefel, Sphere, Zakharov]
+np.set_printoptions(precision=3, suppress=True)
 
 
-# if __name__ == "__main__":
-#     unittest.main()
+class TestNumerical(unittest.TestCase):
+    @parameterized.expand([(cls,) for cls in CLS])
+    def test_vpo(self, cls: Type[Problem]):
+        np.random.seed(1909)
+        nvec = np.random.randint(2, 10)
+        swarmsize = 300
+        # ftol = 1e-8
+        maxiter = 500
+        # period = 10
+        problem = cls()
+
+        def objs(x: np.ndarray) -> np.ndarray:
+            return np.asarray(
+                [problem.evaluate(x_, return_values_of=["F"]) for x_ in x]
+            )
+
+        actual_res = vpso(
+            objs,
+            np.tile(problem.xl, (nvec, 1)),
+            np.tile(problem.xu, (nvec, 1)),
+            #
+            swarmsize=swarmsize,
+            #
+            maxiter=maxiter,
+            #
+            seed=np.random.randint(0, 1000),
+        )
+
+        pf = problem.pareto_front().item()
+        ps = problem.pareto_set().squeeze()
+        np.testing.assert_allclose(
+            actual_res[1], pf, atol=1e-3, rtol=1e-3, err_msg=f"f {cls.__name__}"
+        )
+        if ps.ndim == 1:
+            np.testing.assert_allclose(
+                *np.broadcast_arrays(actual_res[0], ps),
+                atol=1e-3,
+                rtol=1e-3,
+                err_msg=f"x {cls.__name__}",
+            )
+        else:
+            for i in range(nvec):
+                x_opt = actual_res[0][i]
+                self.assertTrue(
+                    any(np.allclose(x_opt, ps_, atol=1e-3, rtol=1e-3) for ps_ in ps),
+                    msg=f"x {i} {cls.__name__}",
+                )
+
+
+if __name__ == "__main__":
+    unittest.main()
