@@ -112,7 +112,7 @@ def vpso(
     # initialize particle's best pos/value and global best
     px = x  # particle's best position
     pf = np.reshape(func(x), (nvec, swarmsize))  # particle's best value
-    sx, sf = get_best(px, pf, nvec)  # social/global best position/value
+    sx, sf = get_best(px, pf, nvec, logger, 0)  # social/global best position/value
 
     # main optimization loop
     termination_reason = "maxiter"
@@ -138,9 +138,7 @@ def vpso(
         )
         f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
         px, pf = advance_population(x, f, px, pf)
-        sx, sf = get_best(px, pf, nvec)
-        logger.debug("best values at iteration %i ∈ [%e, %e]", i, sf.min(), sf.max())
-
+        sx, sf = get_best(px, pf, nvec, logger, i)
         if adaptive:
             w, c1, c2 = adapt(
                 px,
@@ -152,6 +150,7 @@ def vpso(
                 c1,
                 c2,
                 np_random,
+                logger,
             )
 
         # TODO: check termination conditions

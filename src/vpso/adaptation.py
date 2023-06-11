@@ -9,6 +9,8 @@ References
     doi: 10.1109/TSMCB.2009.2015956.
 """
 
+import logging
+
 import numpy as np
 
 from vpso.jit import jit
@@ -105,6 +107,7 @@ def adapt(
     c1: Array3d,
     c2: Array3d,
     np_random: np.random.Generator,
+    logger: logging.Logger,
 ) -> tuple[Array3d, Array3d, Array3d]:
     """Adapts the parameters `w`, `c1` and `c2` on-line.
 
@@ -131,6 +134,8 @@ def adapt(
         the corresponding problem.
     np_random : np.random.Generator
         Random number generator.
+    logger : logging.Logger
+        Logger object.
 
     Returns
     -------
@@ -145,4 +150,17 @@ def adapt(
     Dmax = D.max(1)
     G = batch_cdist(px_normalized, sx_normalized).mean((1, 2))
     stage = (G - Dmin) / (Dmax - Dmin + 1e-32)
-    return perform_adaptation(w, c1, c2, stage, np_random)
+    w_new, c1_new, c2_new = perform_adaptation(w, c1, c2, stage, np_random)
+
+    if logger.level <= logging.DEBUG:
+        logger.debug(
+            "adaptation: w ∈ [%e, %e], c1 ∈ [%e, %e], c2 ∈ [%e, %e]",
+            w_new.min(),
+            w_new.max(),
+            c1_new.min(),
+            c1_new.max(),
+            c2_new.min(),
+            c2_new.max(),
+        )
+
+    return w_new, c1_new, c2_new
