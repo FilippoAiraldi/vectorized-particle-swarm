@@ -118,6 +118,7 @@ class TestAdaptation(unittest.TestCase):
         w_new_, c1_new_, c2_new_ = adapt(
             px,
             sx[:, np.newaxis],
+            nvec,
             swarmsize,
             lb[:, np.newaxis],
             ub[:, np.newaxis],

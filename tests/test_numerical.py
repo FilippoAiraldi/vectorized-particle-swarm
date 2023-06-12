@@ -46,6 +46,8 @@ class TestNumerical(unittest.TestCase):
             #
             maxiter=maxiter,
             #
+            xtol=-1,
+            ftol=-1,
             seed=np.random.randint(0, 1000),
         )
 
