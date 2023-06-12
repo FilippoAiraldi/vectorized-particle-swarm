@@ -87,6 +87,17 @@ _signatures = {
         _float[:],  # stage
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
+    "update_patience": nb.types.UniTuple(_float[:], 2)(
+        _float[:, :, :],  # sx
+        _float[:],  # sf
+        _float[:, :, :],  # sx_new
+        _float[:],  # sf_new
+        _float[:, :, :],  # lb
+        _float[:, :, :],  # ub
+        _float[:],  # xtol
+        _float[:],  # ftol
+        _int[:, :],  # current_patience_level
+    ),
 }
 
 

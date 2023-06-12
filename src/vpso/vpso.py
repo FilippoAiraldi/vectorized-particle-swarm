@@ -9,6 +9,7 @@ from vpso.adaptation import adapt
 from vpso.ask_and_tell import advance_population, generate_offsprings, get_best
 from vpso.initialization import adjust_dimensions as adj_dim
 from vpso.initialization import initialize_particles
+from vpso.termination import termination
 from vpso.typing import Array1d, Array1i, Array2d, Array3d
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ def vpso(
     maxiter: int = 300,  # could be an array, but only the max would be then used
     ftol: Union[float, Array1d] = 1e-8,
     xtol: Union[float, Array1d] = 1e-8,
-    patience: Union[int, Array1i] = 1,
+    patience: Union[int, Array1i] = 30,
     #
     seed: Optional[int] = None,
     verbosity: int = logging.WARNING,
@@ -85,11 +86,13 @@ def vpso(
     ftol : float or 1d array_like of floats, optional
         Tolerance for changes in the objective function value before terminating the
         solver. Can also be an 1d array_like of shape `(N,)` to specify a different
-        value for each of the `N` vectorized problems. By default, `1e-8`.
+        value for each of the `N` vectorized problems. By default, `1e-8`. Pass a
+        negative value to disable this check.
     xtol : float or 1d array_like of floats, optional
         Tolerance for average changes in the objective minimizer before terminating the
         solver. Can also be an 1d array_like of shape `(N,)` to specify a different
-        value for each of the `N` vectorized problems. By default, `1e-8`.
+        value for each of the `N` vectorized problems. By default, `1e-8`. Pass a
+        negative value to disable this check.
     patience : int or 1d array_like of ints, optional
         Number of iterations to wait before terminating the solver if no improvement is
         witnessed. Can also be an 1d array_like of shape `(N,)` to specify a different
@@ -128,6 +131,7 @@ def vpso(
     sx, sf = get_best(px, pf, nvec, logger, 0)  # social/global best position/value
 
     # main optimization loop
+    patience_level = np.zeros((nvec, 2), dtype=int)  # one level for xtol and for ftol
     termination_reason = "maxiter"
     for i in range(1, maxiter + 1):
         x, v = generate_offsprings(
@@ -175,6 +179,12 @@ def vpso(
             )
 
         # check termination conditions
+        should_terminate, reason = termination(
+            sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, patience, patience_level, logger
+        )
+        if should_terminate:
+            termination_reason = reason
+            break
 
         # save new best
         sx = sx_new

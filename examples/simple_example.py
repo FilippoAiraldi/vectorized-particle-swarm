@@ -27,7 +27,7 @@ from vpso import vpso
 logger = logging.getLogger()
 handler = logging.StreamHandler()
 formatter = logging.Formatter(
-    "%(asctime)s - %(name)s (%(levelname)s): %(message)s.", "%Y-%m-%d,%H:%M:%S"
+    "%(asctime)s - %(name)s (%(levelname)s): %(message)s.", "%Y-%m-%d@%H:%M:%S"
 )
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -53,6 +53,8 @@ x_opt, f_opt, _ = vpso(
     func=lambda x: [ackley(x[0]), himmelblau(x[1])],
     lb=-bounds,
     ub=+bounds,
+    patience=10,
+    xtol=-1,  # disable xtol termination
     verbosity=logging.DEBUG,
     seed=1909,
 )
