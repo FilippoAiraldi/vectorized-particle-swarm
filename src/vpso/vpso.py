@@ -163,6 +163,7 @@ def vpso(
             w, c1, c2 = adapt(
                 px,
                 sx_new,
+                nvec,
                 swarmsize,
                 lb,
                 ub,

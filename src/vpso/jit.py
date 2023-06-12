@@ -80,6 +80,7 @@ _signatures = {
     ),
     "adaptation_strategy": _float[:, :](_float[:]),
     "perform_adaptation": nb.types.UniTuple(_float[:, :, :], 3)(
+        _int,  # nvec
         _float[:, :, :],  # w
         _float[:, :, :],  # c1
         _float[:, :, :],  # c2

@@ -13,7 +13,7 @@ import logging
 
 import numpy as np
 
-from vpso.jit import jit
+from vpso.jit import _int, jit
 from vpso.math import batch_cdist, batch_pdist, batch_squareform
 from vpso.typing import Array1d, Array2d, Array3d
 
@@ -50,6 +50,7 @@ def adaptation_strategy(f: Array1d) -> Array2d:
 
 @jit
 def perform_adaptation(
+    nvec: int,
     w: Array3d,
     c1: Array3d,
     c2: Array3d,
@@ -61,6 +62,8 @@ def perform_adaptation(
 
     Parameters
     ----------
+    nvec : int
+        Number of vectorized problems.
     w : 3d array
         Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
         the corresponding problem.
@@ -86,7 +89,7 @@ def perform_adaptation(
 
     # adapt c1 and c2
     deltas = adaptation_strategy(stage) * np_random.uniform(
-        0.05, 0.1, size=(w.shape[0], 1)
+        0.05, 0.1, size=(nvec, _int(1))
     )
     c1 = (c1 + deltas[:, 0, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     c2 = (c2 + deltas[:, 1, np.newaxis, np.newaxis]).clip(1.5, 2.5)
@@ -100,6 +103,7 @@ def perform_adaptation(
 def adapt(
     px: Array3d,
     sx: Array3d,
+    nvec: int,
     swarmsize: int,
     lb: Array3d,
     ub: Array3d,
@@ -117,6 +121,8 @@ def adapt(
         Best positions of the particles so far. An array of shape `(N, M, d)`.
     sx : 3d array
         Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
+    nvec : int
+        Number of vectorized problems.
     swarmsize : int
         Number of particles in the swarm.
     lb : 3d array
@@ -150,7 +156,7 @@ def adapt(
     Dmax = D.max(1)
     G = batch_cdist(px_normalized, sx_normalized).mean((1, 2))
     stage = (G - Dmin) / (Dmax - Dmin + 1e-32)
-    w_new, c1_new, c2_new = perform_adaptation(w, c1, c2, stage, np_random)
+    w_new, c1_new, c2_new = perform_adaptation(nvec, w, c1, c2, stage, np_random)
 
     if logger.level <= logging.DEBUG:
         logger.debug(
