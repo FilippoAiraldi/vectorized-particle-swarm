@@ -89,6 +89,6 @@ _signatures = {
 }
 
 
-def jit(func: Callable) -> Callable:
+def jit(func: Callable, cache: bool = True) -> Callable:
     """Assigns a jit decorator to the given function with the correct signature."""
-    return nb.njit(_signatures[func.__name__], cache=True)(func)
+    return nb.njit(_signatures[func.__name__], cache=cache)(func)
