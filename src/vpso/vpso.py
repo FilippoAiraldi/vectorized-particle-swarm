@@ -152,6 +152,13 @@ def vpso(
         f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
         px, pf = advance_population(x, f, px, pf)
         sx_new, sf_new = get_best(px, pf, nvec, logger, i)
+
+        # DEBUG
+        # px.flags.writeable = (
+        #     pf.flags.writeable
+        # ) = sx.flags.writeable = sf.flags.writeable = False
+        # assert (sf_new <= sf).all()
+
         if adaptive:
             w, c1, c2 = adapt(
                 px,
