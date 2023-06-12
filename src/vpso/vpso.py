@@ -131,7 +131,7 @@ def vpso(
     sx, sf = get_best(px, pf, nvec, logger, 0)  # social/global best position/value
 
     # main optimization loop
-    patience_level = np.zeros((nvec, 2), dtype=int)  # one level for xtol and for ftol
+    patience_level = np.zeros((nvec, 2), dtype=np.int32)  # 2 level for x and for f
     termination_reason = "maxiter"
     for i in range(1, maxiter + 1):
         x, v = generate_offsprings(
