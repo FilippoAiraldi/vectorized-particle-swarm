@@ -14,7 +14,7 @@ import logging
 import numpy as np
 
 from vpso.jit import _int, jit
-from vpso.math import batch_cdist, batch_pdist
+from vpso.math import batch_cdist_and_pdist
 from vpso.typing import Array1d, Array2d, Array3d
 
 
@@ -91,9 +91,10 @@ def perform_adaptation(
     domain = ub - lb
     px_norm = px / domain
     sx_norm = sx / domain
-    D = batch_pdist(px_norm, "euclidean").sum(2) / (swarmsize - 1)
-    G = batch_cdist(px_norm, sx_norm, "euclidean")[:, :, 0].sum(1) / swarmsize
-    # NOTE: cannot perform Dmin = D.min(1) and Dmax = D.max(1) in numba, so we use
+    G_, D_ = batch_cdist_and_pdist(px_norm, sx_norm, "euclidean")
+    G = G_[:, :, 0].sum(1) / swarmsize
+    D = D_.sum(2) / (swarmsize - 1)
+    # NOTE: cannot run Dmin = D.min(1) and Dmax = D.max(1) in numba, so we use
     # https://stackoverflow.com/a/71214489/19648688
     Dmin = np.take_along_axis(D, D.argmin(1)[:, np.newaxis], 1)[:, 0]
     Dmax = np.take_along_axis(D, D.argmax(1)[:, np.newaxis], 1)[:, 0]

@@ -14,6 +14,9 @@ _signatures = {
         nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
     ),
     "batch_pdist": nb.float64[:, :, :](nb.float64[:, :, :], nb.types.unicode_type),
+    "batch_cdist_and_pdist": nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
+    ),
     "pso_equation": nb.types.UniTuple(_float[:, :, :], 2)(
         _float[:, :, :],  # x
         _float[:, :, :],  # px

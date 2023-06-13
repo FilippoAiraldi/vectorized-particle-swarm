@@ -140,16 +140,17 @@ def batch_cdist_and_pdist(
 
     Returns
     -------
-    3d array
-        Distance matrices between each of the `(M, d)` and `(K, d)` matrices, where `d`
-        is assumed to be the axis over which the distance is computed. The output has
-        thus shape (N, M, K).
+    tuple of 3d arrays
+        Returns both distance matrices between `X` and `Y` and `X` itself. See
+        `batch_cdist` and `batch_pdist` for more details.
     """
     B, N, _ = X.shape
-    out = np.empty((B, N, N), dtype=X.dtype)
+    out_c = np.empty((B, N, Y.shape[1]), dtype=X.dtype)
+    out_p = np.empty((B, N, N), dtype=X.dtype)
     for i in prange(B):
-        out[i] = pdist_func(X[i], type)
-    return out
+        out_c[i] = cdist_func(X[i], Y[i], type)
+        out_p[i] = pdist_func(X[i], type)
+    return out_c, out_p
 
 
 @jit()

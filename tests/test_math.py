@@ -4,7 +4,7 @@ import numpy as np
 from parameterized import parameterized
 from scipy.spatial.distance import cdist, pdist, squareform
 
-from vpso.math import batch_cdist, batch_pdist, pso_equation
+from vpso.math import batch_cdist, batch_cdist_and_pdist, batch_pdist, pso_equation
 
 
 class TestMath(unittest.TestCase):
@@ -19,12 +19,22 @@ class TestMath(unittest.TestCase):
 
     @parameterized.expand((("euclidean",), ("sqeuclidean",)))
     def test_batch_pdist(self, dist_type: str):
-        np.random.seed(0)
         N, M, d = np.random.randint(10, 50, size=3)
         X = np.random.randn(N, M, d)
         actual = batch_pdist(X, dist_type)
         expected = np.asarray([squareform(pdist(x, dist_type)) for x in X])
         np.testing.assert_allclose(actual, expected)
+
+    @parameterized.expand((("euclidean",), ("sqeuclidean",)))
+    def test_batch_cdist_and_pdist(self, dist_type: str):
+        N, M1, M2, d = np.random.randint(10, 50, size=4)
+        X = np.random.randn(N, M1, d)
+        Y = np.random.randn(N, M2, d)
+        actual_c, actual_p = batch_cdist_and_pdist(X, Y, dist_type)
+        expected_c = np.asarray([cdist(x, y, dist_type) for x, y in zip(X, Y)])
+        expected_p = np.asarray([squareform(pdist(x, dist_type)) for x in X])
+        np.testing.assert_allclose(actual_c, expected_c)
+        np.testing.assert_allclose(actual_p, expected_p)
 
     def test_pso_equation(self):
         seed = np.random.randint(0, 1000)
