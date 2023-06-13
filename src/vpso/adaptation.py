@@ -14,7 +14,7 @@ import logging
 import numpy as np
 
 from vpso.jit import _int, jit
-from vpso.math import batch_cdist, batch_pdist, batch_squareform
+from vpso.math import batch_cdist, batch_pdist
 from vpso.typing import Array1d, Array2d, Array3d
 
 
@@ -151,10 +151,10 @@ def adapt(
     domain = ub - lb
     px_normalized = px / domain
     sx_normalized = sx / domain
-    D = batch_squareform(batch_pdist(px_normalized)).sum(2) / (swarmsize - 1)
+    D = batch_pdist(px_normalized, "euclidean").sum(2) / (swarmsize - 1)
     Dmin = D.min(1)
     Dmax = D.max(1)
-    G = batch_cdist(px_normalized, sx_normalized).mean((1, 2))
+    G = batch_cdist(px_normalized, sx_normalized, "euclidean").mean((1, 2))
     stage = (G - Dmin) / (Dmax - Dmin + 1e-32)
     w_new, c1_new, c2_new = perform_adaptation(nvec, w, c1, c2, stage, np_random)
 

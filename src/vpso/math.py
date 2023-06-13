@@ -1,16 +1,73 @@
+from typing import Literal
+
 import numpy as np
-from scipy.spatial.distance import (
-    _copy_array_if_base_present,
-    _distance_pybind,
-    _distance_wrap,
-)
+from numba import prange
 
 from vpso.jit import jit
 from vpso.typing import Array2d, Array3d
 
 
+@jit()
+def cdist_func(
+    x: Array2d, y: Array2d, type: Literal["euclidean", "sqeuclidean"]
+) -> Array2d:
+    """Computes the distance matrix for 2D arrays `x` and `y`.
+
+    Parameters
+    ----------
+    x : 2d array
+        A 2D array of shape `(N, d)`.
+    y : 2d array
+        A 2D array of shape `(M, d)`.
+    type : {"euclidean", "sqeuclidean"}
+        Type of distance to compute.
+
+    Returns
+    -------
+    2d array
+        Distance matrix of shape `(N, M)` between each pair of entries in `x` and `y`.
+    """
+    x2_sum = np.square(x).sum(axis=1)
+    y2_sum = np.square(y).sum(axis=1)
+    xy_dot = np.dot(x, y.T)
+    D = np.maximum(x2_sum[:, np.newaxis] + y2_sum - 2 * xy_dot, 0.0)
+    if type == "euclidean":
+        return np.sqrt(D)
+    if type == "sqeuclidean":
+        return D
+    raise ValueError(f"unknown cdist type: {type}")
+
+
+@jit()
+def pdist_func(x: Array2d, type: Literal["euclidean", "sqeuclidean"]) -> Array2d:
+    """Computes the pairwise distance matrix of the elements in the 2D array `x`.
+
+    Parameters
+    ----------
+    x : 2d array
+        A 2D array of shape `(N, d)`.
+    type : {"euclidean", "sqeuclidean"}
+        Type of distance to compute.
+
+    Returns
+    -------
+    2d array
+        Symmetric distance matrix of shape `(N, N)` between each pair of entries in `x`.
+    """
+    x2_sum = np.square(x).sum(axis=1)
+    xx_dot = np.dot(x, x.T)
+    D = np.maximum(x2_sum[:, np.newaxis] + x2_sum - 2 * xx_dot, 0.0)
+    np.fill_diagonal(D, 0.0)
+    if type == "euclidean":
+        return np.sqrt(D)
+    if type == "sqeuclidean":
+        return D
+    raise ValueError(f"unknown pdist type: {type}")
+
+
+@jit(parallel=True)
 def batch_cdist(
-    X: Array3d, Y: Array3d, dist_func=_distance_pybind.cdist_euclidean
+    X: Array3d, Y: Array3d, type: Literal["euclidean", "sqeuclidean"]
 ) -> Array3d:
     """Computes the distance matrices for 3D arrays.
 
@@ -31,14 +88,15 @@ def batch_cdist(
         is assumed to be the axis over which the distance is computed. The output has
         thus shape (N, M, K).
     """
-    N = X.shape[0]
-    out = np.empty((N, X.shape[1], Y.shape[1]), dtype=X.dtype)
-    for i in range(N):
-        dist_func(X[i], Y[i], out=out[i])
+    B, N, _ = X.shape
+    out = np.empty((B, N, Y.shape[1]), dtype=X.dtype)
+    for i in prange(B):
+        out[i] = cdist_func(X[i], Y[i], type)
     return out
 
 
-def batch_pdist(X: Array3d, dist_func=_distance_pybind.pdist_euclidean) -> Array2d:
+@jit(parallel=True)
+def batch_pdist(X: Array3d, type: Literal["euclidean", "sqeuclidean"]) -> Array3d:
     """Computes the pairwise distance matrices for the entries of a 3D array.
 
     Parameters
@@ -56,33 +114,10 @@ def batch_pdist(X: Array3d, dist_func=_distance_pybind.pdist_euclidean) -> Array
         the `(M, d)` matrices, where `d` is assumed to be the axis over which the
         distance is computed.
     """
-    N, M = X.shape[:2]
-    out = np.empty((N, (M - 1) * M // 2), dtype=X.dtype)
-    for i in range(N):
-        dist_func(X[i], out=out[i])
-    return out
-
-
-def batch_squareform(D: Array2d) -> Array2d:
-    """Converts a batch of pairwise distance matrices to distance matrices.
-
-    Parameters
-    ----------
-    D : 2d array
-        Pairwise distance matrices of shape `(N, M * (M - 1) / 2)`, i.e., as returned by
-        `batch_pdist` and not in square form.
-
-    Returns
-    -------
-    3d array
-        The same distance matrices but in square form, i.e., of shape `(N, M, M)`.
-    """
-    D = _copy_array_if_base_present(D)
-    N, M = D.shape
-    d = int(0.5 * (np.sqrt(8 * M + 1) + 1))
-    out = np.zeros((N, d, d), dtype=D.dtype)
-    for i in range(N):
-        _distance_wrap.to_squareform_from_vector_wrap(out[i], D[i])
+    B, N, _ = X.shape
+    out = np.empty((B, N, N), dtype=X.dtype)
+    for i in prange(B):
+        out[i] = pdist_func(X[i], type)
     return out
 
 

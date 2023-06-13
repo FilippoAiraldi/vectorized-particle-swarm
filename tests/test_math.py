@@ -1,32 +1,29 @@
 import unittest
 
 import numpy as np
+from parameterized import parameterized
 from scipy.spatial.distance import cdist, pdist, squareform
 
-from vpso.math import batch_cdist, batch_pdist, batch_squareform, pso_equation
+from vpso.math import batch_cdist, batch_pdist, pso_equation
 
 
 class TestMath(unittest.TestCase):
-    def test_batch_cdist(self):
+    @parameterized.expand((("euclidean",), ("sqeuclidean",)))
+    def test_batch_cdist(self, dist_type: str):
         N, M1, M2, d = np.random.randint(10, 50, size=4)
         X = np.random.randn(N, M1, d)
         Y = np.random.randn(N, M2, d)
-        actual = batch_cdist(X, Y)
-        expected = np.asarray([cdist(x, y) for x, y in zip(X, Y)])
+        actual = batch_cdist(X, Y, dist_type)
+        expected = np.asarray([cdist(x, y, dist_type) for x, y in zip(X, Y)])
         np.testing.assert_allclose(actual, expected)
 
-    def test_batch_pdist(self):
+    @parameterized.expand((("euclidean",), ("sqeuclidean",)))
+    def test_batch_pdist(self, dist_type: str):
+        np.random.seed(0)
         N, M, d = np.random.randint(10, 50, size=3)
         X = np.random.randn(N, M, d)
-        actual = batch_pdist(X)
-        expected = np.asarray([pdist(x) for x in X])
-        np.testing.assert_allclose(actual, expected)
-
-    def test_batch_squareform(self):
-        N, d = np.random.randint(10, 50, size=2)
-        X = np.random.randn(N, d * (d - 1) // 2)
-        actual = batch_squareform(X)
-        expected = np.asarray([squareform(x) for x in X])
+        actual = batch_pdist(X, dist_type)
+        expected = np.asarray([squareform(pdist(x, dist_type)) for x in X])
         np.testing.assert_allclose(actual, expected)
 
     def test_pso_equation(self):

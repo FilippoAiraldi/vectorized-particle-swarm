@@ -6,6 +6,14 @@ _float = nb.float64
 _int = nb.int32
 
 _signatures = {
+    "cdist_func": nb.float64[:, :](
+        nb.float64[:, :], nb.float64[:, :], nb.types.unicode_type
+    ),
+    "pdist_func": nb.float64[:, :](nb.float64[:, :], nb.types.unicode_type),
+    "batch_cdist": nb.float64[:, :, :](
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
+    ),
+    "batch_pdist": nb.float64[:, :, :](nb.float64[:, :, :], nb.types.unicode_type),
     "pso_equation": nb.types.UniTuple(_float[:, :, :], 2)(
         _float[:, :, :],  # x
         _float[:, :, :],  # px
