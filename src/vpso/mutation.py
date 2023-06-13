@@ -1,10 +1,8 @@
 import numpy as np
 
-from vpso.jit import _int, jit
 from vpso.typing import Array2d, Array3d
 
 
-@jit
 def polynomial_mutation(
     x_best: Array2d,
     mutation_mask: Array2d,
@@ -52,7 +50,6 @@ def polynomial_mutation(
     return np.where(mutation_mask, x_best + deltaq * domain, x_best).clip(lb, ub)
 
 
-@jit
 def mutate(
     x: Array3d,
     px: Array3d,
@@ -92,7 +89,7 @@ def mutate(
     """
     # get the mutation mask for each vectorized problem, and for each dimension
     mutation_mask = np.logical_and(
-        np_random.random((nvec, _int(1))) <= mutation_prob,
+        np_random.random((nvec, 1)) <= mutation_prob,
         np_random.random((nvec, dim)) <= min(0.5, 1 / dim),
     )
     if not mutation_mask.any():

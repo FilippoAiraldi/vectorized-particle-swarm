@@ -1,11 +1,9 @@
 import numpy as np
 
-from vpso.jit import jit
 from vpso.math import pso_equation
 from vpso.typing import Array3d
 
 
-@jit
 def repair_out_of_bounds(
     x: Array3d,
     x_new: Array3d,

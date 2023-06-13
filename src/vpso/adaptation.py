@@ -13,12 +13,10 @@ import logging
 
 import numpy as np
 
-from vpso.jit import _int, jit
 from vpso.math import batch_cdist, batch_pdist, batch_squareform
 from vpso.typing import Array1d, Array2d, Array3d
 
 
-@jit
 def adaptation_strategy(f: Array1d) -> Array2d:
     """Picks the adaptation strategy for each problem based on the ratio of average
     distances between particles and to the best particle.
@@ -38,17 +36,13 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     f = f[:, np.newaxis]  # add a dimension for broadcasting
 
     # NOTE: fails in numba's npython mode
-    # deltas = np.full((f.size, 2), (-1.0, 1.0), dtype=f.dtype)  # initialize all to S4
-    deltas = np.full((f.size, 2), -1.0)  # initialize all to S4 (fill in two steps)
-    deltas[:, 1].fill(1.0)
-
+    deltas = np.full((f.size, 2), (-1.0, 1.0), dtype=f.dtype)  # initialize all to S4
     deltas = np.where(f <= 23 / 30, [(1.0, -1.0)], deltas)  # S1
     deltas = np.where(f < 0.5, [(0.5, -0.5)], deltas)  # S2
     deltas = np.where(f < 7 / 30, [(0.5, 0.5)], deltas)  # S3
     return deltas
 
 
-@jit
 def perform_adaptation(
     nvec: int,
     w: Array3d,
@@ -89,7 +83,7 @@ def perform_adaptation(
 
     # adapt c1 and c2
     deltas = adaptation_strategy(stage) * np_random.uniform(
-        0.05, 0.1, size=(nvec, _int(1))
+        0.05, 0.1, size=(nvec, 1)
     )
     c1 = (c1 + deltas[:, 0, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     c2 = (c2 + deltas[:, 1, np.newaxis, np.newaxis]).clip(1.5, 2.5)

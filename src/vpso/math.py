@@ -5,7 +5,6 @@ from scipy.spatial.distance import (
     _distance_wrap,
 )
 
-from vpso.jit import jit
 from vpso.typing import Array2d, Array3d
 
 
@@ -86,7 +85,6 @@ def batch_squareform(D: Array2d) -> Array2d:
     return out
 
 
-@jit
 def pso_equation(
     x: Array3d,
     px: Array3d,
