@@ -8,7 +8,7 @@ version = "1.0.1"
 authors = [
   { name="Filippo Airaldi", email="filippoairaldi@gmail.com" },
 ]
-description = "Multiple Particle Swarm Optimization"
+description = "Vectorized Particle Swarm Optimization"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
