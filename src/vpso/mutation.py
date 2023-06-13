@@ -4,7 +4,7 @@ from vpso.jit import _int, jit
 from vpso.typing import Array2d, Array3d
 
 
-@jit
+@jit()
 def polynomial_mutation(
     x_best: Array2d,
     mutation_mask: Array2d,
@@ -52,7 +52,7 @@ def polynomial_mutation(
     return np.where(mutation_mask, x_best + deltaq * domain, x_best).clip(lb, ub)
 
 
-@jit
+@jit()
 def mutate(
     x: Array3d,
     px: Array3d,

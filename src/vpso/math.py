@@ -86,7 +86,7 @@ def batch_squareform(D: Array2d) -> Array2d:
     return out
 
 
-@jit
+@jit()
 def pso_equation(
     x: Array3d,
     px: Array3d,

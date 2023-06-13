@@ -18,7 +18,7 @@ from vpso.math import batch_cdist, batch_pdist, batch_squareform
 from vpso.typing import Array1d, Array2d, Array3d
 
 
-@jit
+@jit()
 def adaptation_strategy(f: Array1d) -> Array2d:
     """Picks the adaptation strategy for each problem based on the ratio of average
     distances between particles and to the best particle.
@@ -48,7 +48,7 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     return deltas
 
 
-@jit
+@jit()
 def perform_adaptation(
     nvec: int,
     w: Array3d,

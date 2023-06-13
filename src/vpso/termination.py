@@ -6,7 +6,7 @@ from vpso.jit import jit
 from vpso.typing import Array1d, Array1i, Array2i, Array3d
 
 
-@jit
+@jit()
 def update_patience(
     sx: Array3d,
     sf: Array1d,

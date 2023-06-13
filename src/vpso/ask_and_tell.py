@@ -9,7 +9,7 @@ from vpso.reparation import repair_out_of_bounds
 from vpso.typing import Array1d, Array2d, Array3d
 
 
-@jit
+@jit()
 def generate_offsprings(
     x: Array3d,
     px: Array3d,
@@ -87,7 +87,7 @@ def generate_offsprings(
     return x_new, v_new
 
 
-@jit
+@jit()
 def advance_population(
     x: Array3d, f: Array2d, px: Array3d, pf: Array2d
 ) -> tuple[Array3d, Array2d]:
