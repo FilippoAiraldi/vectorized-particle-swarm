@@ -13,6 +13,22 @@ References
     http://www.sfu.ca.tudelft.idm.oclc.org/~ssurjano.
 """
 
+from timeit import timeit
+
+import numpy as np
+
+N, M, D = 100, 20, 20
+X = np.random.rand(N, M, D)
+Y = np.random.rand(N, M // 2, D)
+
+from vpso.math import batch_cdist
+from vpso.math2 import batch_cdist2
+
+
+
+quit()
+
+
 
 import os
 
