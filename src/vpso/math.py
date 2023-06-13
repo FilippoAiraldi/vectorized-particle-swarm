@@ -109,10 +109,41 @@ def batch_pdist(X: Array3d, type: Literal["euclidean", "sqeuclidean"]) -> Array3
 
     Returns
     -------
-    2d array
-        Distance matrix of shape `(N, M * (M - 1) / 2)` between each pair of entries of
+    3d array
+        Distance matrix of shape `(N, M, M)` between each pair of entries of
         the `(M, d)` matrices, where `d` is assumed to be the axis over which the
         distance is computed.
+    """
+    B, N, _ = X.shape
+    out = np.empty((B, N, N), dtype=X.dtype)
+    for i in prange(B):
+        out[i] = pdist_func(X[i], type)
+    return out
+
+
+@jit(parallel=True)
+def batch_cdist_and_pdist(
+    X: Array3d, Y: Array3d, type: Literal["euclidean", "sqeuclidean"]
+) -> tuple[Array3d, Array3d]:
+    """Computes the distance matrices between the 3D arrays `X` and `Y`, as well as the
+    pairwise distance matrices for the entries of `X`.
+
+    Parameters
+    ----------
+    X : 3d array
+        An array of shape `(N, M, d)`.
+    Y : 3d array
+        An array of shape `(N, K, d)`.
+    dist_func : callable, optional
+        Distance function to use. By default, `scipy.spatial.distance.cdist_euclidean`
+        is used. It must support the `out` argument.
+
+    Returns
+    -------
+    3d array
+        Distance matrices between each of the `(M, d)` and `(K, d)` matrices, where `d`
+        is assumed to be the axis over which the distance is computed. The output has
+        thus shape (N, M, K).
     """
     B, N, _ = X.shape
     out = np.empty((B, N, N), dtype=X.dtype)
