@@ -50,11 +50,15 @@ def adaptation_strategy(f: Array1d) -> Array2d:
 
 @jit()
 def perform_adaptation(
+    px: Array3d,
+    sx: Array3d,
     nvec: int,
+    swarmsize: int,
+    lb: Array3d,
+    ub: Array3d,
     w: Array3d,
     c1: Array3d,
     c2: Array3d,
-    stage: Array1d,
     np_random: np.random.Generator,
 ) -> tuple[Array3d, Array3d, Array3d]:
     """Performs the adaptation of the parameters `w`, `c1` and `c2` based on the
@@ -84,6 +88,17 @@ def perform_adaptation(
     tuple of 3d arrays
         The newly adapted parameters `w`, `c1` and `c2`.
     """
+    domain = ub - lb
+    px_norm = px / domain
+    sx_norm = sx / domain
+    D = batch_pdist(px_norm, "euclidean").sum(2) / (swarmsize - 1)
+    G = batch_cdist(px_norm, sx_norm, "euclidean")[:, :, 0].sum(1) / swarmsize
+    # NOTE: cannot perform Dmin = D.min(1) and Dmax = D.max(1) in numba, so we use
+    # https://stackoverflow.com/a/71214489/19648688
+    Dmin = np.take_along_axis(D, D.argmin(1)[:, np.newaxis], 1)[:, 0]
+    Dmax = np.take_along_axis(D, D.argmax(1)[:, np.newaxis], 1)[:, 0]
+    stage = (G - Dmin) / (Dmax - Dmin + 1e-32)
+
     # adapt w
     w = (1 / (1 + 1.5 * np.exp(-2.6 * stage)))[:, np.newaxis, np.newaxis]
 
@@ -148,15 +163,9 @@ def adapt(
     tuple of 3d arrays
         The newly adapted parameters `w`, `c1` and `c2`.
     """
-    domain = ub - lb
-    px_normalized = px / domain
-    sx_normalized = sx / domain
-    D = batch_pdist(px_normalized, "euclidean").sum(2) / (swarmsize - 1)
-    Dmin = D.min(1)
-    Dmax = D.max(1)
-    G = batch_cdist(px_normalized, sx_normalized, "euclidean").mean((1, 2))
-    stage = (G - Dmin) / (Dmax - Dmin + 1e-32)
-    w_new, c1_new, c2_new = perform_adaptation(nvec, w, c1, c2, stage, np_random)
+    w_new, c1_new, c2_new = perform_adaptation(
+        px, sx, nvec, swarmsize, lb, ub, w, c1, c2, np_random
+    )
 
     if logger.level <= logging.DEBUG:
         logger.debug(

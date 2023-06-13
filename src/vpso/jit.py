@@ -88,11 +88,15 @@ _signatures = {
     ),
     "adaptation_strategy": _float[:, :](_float[:]),
     "perform_adaptation": nb.types.UniTuple(_float[:, :, :], 3)(
+        _float[:, :, :],  # px
+        _float[:, :, :],  # sx
         _int,  # nvec
+        _int,  # swarmize
+        _float[:, :, :],  # lb
+        _float[:, :, :],  # ub
         _float[:, :, :],  # w
         _float[:, :, :],  # c1
         _float[:, :, :],  # c2
-        _float[:],  # stage
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     "update_patience": nb.types.UniTuple(_float[:], 2)(
