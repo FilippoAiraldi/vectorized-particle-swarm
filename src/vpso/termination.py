@@ -65,7 +65,8 @@ def update_patience(
     Returns
     -------
     tuple of 1d arrays
-        Returns the current termination criteria for `x` and `f`, respectively.
+        Returns the current termination criteria for `x` and `f`, respectively, for each
+        vectorized problem.
     """
     # NOTE: current patience level is to be modified in-place
     # normalize sx and sx_new and compute normalized euclidean distance (could call
@@ -85,7 +86,7 @@ def update_patience(
 
 
 @nb.njit(
-    nb.types.Tuple((nb.bool_, nb.types.unicode_type))(
+    nb.types.Tuple((nb.bool_, nb.types.unicode_type, nb.float64, nb.float64))(
         nb.float64[:, :, :],  # sx
         nb.float64[:],  # sf
         nb.float64[:, :, :],  # sx_new
@@ -111,7 +112,7 @@ def termination(
     ftol: Array1d,
     patience: Array1i,
     current_patience_level: Array2i,
-) -> tuple[bool, str]:
+) -> tuple[bool, str, float, float]:
     """Checks whether the solver should terminate, and the reason why. Updates the
     patience level for each problem as a function of the previous and next best
     particle. The level is increased if tolerances are met, and reset to zero if the new
@@ -150,15 +151,18 @@ def termination(
 
     Returns
     -------
-    tuple of bool and str
+    tuple of bool, str, range_min, range_max
         Returns whether the solver should terminate, and the reason why. The reason can
         be either `xtol` or `ftol`, depending on which tolerance was met first.
+        Moreover, the min/max range for the tolerances that induced termination across
+        the vectorized problems is returned.
     """
     D, F = update_patience(
         sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, current_patience_level
     )
+    # NOTE: can't f-string here because of numba, so we just return the ingredients
     if (current_patience_level[:, 0] >= patience).all():
-        return True, f"xtol ∈ [{D.min():e}, {D.max():e}]"
+        return True, "xtol", D.min(), D.max()
     if (current_patience_level[:, 1] >= patience).all():
-        return True, f"ftol ∈ [{F.min():e}, {F.max():e}]"
-    return False, ""
+        return True, "ftol", F.min(), F.max()
+    return False, "", np.nan, np.nan

@@ -14,9 +14,9 @@ References
 """
 
 
-import os
+# import os
 
-os.environ["NUMBA_DISABLE_JIT"] = "1"
+# os.environ["NUMBA_DISABLE_JIT"] = "1"  # to avoid compilation time
 
 import numpy as np
 
@@ -48,7 +48,7 @@ x_opt, f_opt, msg = vpso(
     seed=1909,
 )
 
-print("termination message:", msg)
+print("termination reason:", msg)
 
 for i, fun in enumerate([ackley, himmelblau]):
     print(f"Function {i + 1} ({fun.__name__}):")

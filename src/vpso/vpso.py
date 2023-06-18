@@ -158,11 +158,11 @@ def vpso(
             w, c1, c2 = adapt(px, sx_new, nvec, swarmsize, lb, ub, w, c1, c2, np_random)
 
         # check termination conditions
-        should_terminate, reason = termination(
+        should_terminate, reason, range_min, range_max = termination(
             sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, patience, patience_level
         )
         if should_terminate:
-            termination_reason = reason
+            termination_reason = f"{reason} ∈ [{range_min:e}, {range_max:e}]"
             break
 
         # save new best
