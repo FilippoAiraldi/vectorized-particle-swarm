@@ -1,9 +1,9 @@
-from numpy import double, int_
+from numpy import float64, int64
 from numpy.typing import NDArray
 from typing_extensions import TypeAlias
 
-Array1d: TypeAlias = NDArray[double]
-Array2d: TypeAlias = NDArray[double]
-Array3d: TypeAlias = NDArray[double]
-Array1i: TypeAlias = NDArray[int_]
-Array2i: TypeAlias = NDArray[int_]
+Array1d: TypeAlias = NDArray[float64]
+Array2d: TypeAlias = NDArray[float64]
+Array3d: TypeAlias = NDArray[float64]
+Array1i: TypeAlias = NDArray[int64]
+Array2i: TypeAlias = NDArray[int64]
