@@ -18,19 +18,9 @@ import os
 
 os.environ["NUMBA_DISABLE_JIT"] = "1"
 
-import logging
-
 import numpy as np
 
 from vpso import vpso
-
-logger = logging.getLogger()
-handler = logging.StreamHandler()
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s (%(levelname)s): %(message)s.", "%Y-%m-%d@%H:%M:%S"
-)
-handler.setFormatter(formatter)
-logger.addHandler(handler)
 
 
 def ackley(x):
@@ -49,16 +39,16 @@ bounds = np.tile([32.768, 6], (n_vars, 1))
 
 
 # run the optimization
-x_opt, f_opt, _ = vpso(
+x_opt, f_opt, msg = vpso(
     func=lambda x: [ackley(x[0]), himmelblau(x[1])],
     lb=-bounds,
     ub=+bounds,
     patience=10,
     xtol=-1,  # disable xtol termination
-    verbosity=logging.DEBUG,
     seed=1909,
 )
 
+print("termination message:", msg)
 
 for i, fun in enumerate([ackley, himmelblau]):
     print(f"Function {i + 1} ({fun.__name__}):")

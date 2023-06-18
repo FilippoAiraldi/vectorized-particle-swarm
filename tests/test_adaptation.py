@@ -1,4 +1,3 @@
-import logging
 import unittest
 
 import numpy as np
@@ -126,7 +125,6 @@ class TestAdaptation(unittest.TestCase):
             c1[:, np.newaxis, np.newaxis],
             c2[:, np.newaxis, np.newaxis],
             np_random,
-            logging.getLogger(),
         )
         np.testing.assert_allclose(w_new_.squeeze(), w_new, err_msg="w")
         np.testing.assert_allclose(c1_new_.squeeze(), c1_new, err_msg="c1")

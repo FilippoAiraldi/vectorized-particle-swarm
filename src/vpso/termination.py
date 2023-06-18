@@ -1,5 +1,3 @@
-import logging
-
 import numba as nb
 import numpy as np
 
@@ -97,7 +95,6 @@ def termination(
     ftol: Array1d,
     patience: Array1i,
     current_patience_level: Array2i,
-    logger: logging.Logger,
 ) -> tuple[bool, str]:
     """Checks whether the solver should terminate, and the reason why. Updates the
     patience level for each problem as a function of the previous and next best
@@ -144,17 +141,8 @@ def termination(
     D, F = update_patience(
         sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, current_patience_level
     )
-    if logger.level <= logging.DEBUG:
-        logger.debug(
-            "changes: x ∈ [%e, %e], f ∈ [%e, %e]",
-            D.min(),
-            D.max(),
-            F.min(),
-            F.max(),
-        )
-
     if (current_patience_level[:, 0] >= patience).all():
-        return True, "xtol"
+        return True, f"xtol ∈ [{D.min():e}, {D.max():e}]"
     if (current_patience_level[:, 1] >= patience).all():
-        return True, "ftol"
+        return True, f"ftol ∈ [{F.min():e}, {F.max():e}]"
     return False, ""

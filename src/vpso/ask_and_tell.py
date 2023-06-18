@@ -1,5 +1,3 @@
-import logging
-
 import numba as nb
 import numpy as np
 
@@ -148,9 +146,7 @@ def advance_population(
     return px, pf
 
 
-def get_best(
-    px: Array3d, pf: Array2d, nvec: int, logger: logging.Logger, iter: int
-) -> tuple[Array3d, Array1d]:
+def get_best(px: Array3d, pf: Array2d, nvec: int) -> tuple[Array3d, Array1d]:
     """Returns the best particle and its value for each problem.
 
     Parameters
@@ -163,10 +159,6 @@ def get_best(
         Best values of the particles so far. An array of shape `(N, M)`.
     nvec : int
         Number of vectorized problems.
-    logger : logging.Logger
-        Logger object.
-    iter : int
-        Current iteration. Only used for logging.
 
     Returns
     -------
@@ -178,7 +170,4 @@ def get_best(
     k = pf.argmin(1)
     sx = px[idx, np.newaxis, k]  # (social/global) best particle
     sf = pf[idx, k]  # (social/global) best value
-
-    if logger.level <= logging.INFO:
-        logger.info("best values at iteration %i ∈ [%e, %e]", iter, sf.min(), sf.max())
     return sx, sf

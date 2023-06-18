@@ -9,8 +9,6 @@ References
     doi: 10.1109/TSMCB.2009.2015956.
 """
 
-import logging
-
 import numba as nb
 import numpy as np
 
@@ -68,7 +66,7 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     cache=True,
     nogil=True,
 )
-def perform_adaptation(
+def adapt(
     px: Array3d,
     sx: Array3d,
     nvec: int,
@@ -108,9 +106,7 @@ def perform_adaptation(
         The newly adapted parameters `w`, `c1` and `c2`.
     """
     domain = ub - lb
-    px_norm = px / domain
-    sx_norm = sx / domain
-    G_, D_ = batch_cdist_and_pdist(px_norm, sx_norm, "euclidean")
+    G_, D_ = batch_cdist_and_pdist(px / domain, sx / domain, "euclidean")
     G = G_[:, :, 0].sum(1) / swarmsize
     D = D_.sum(2) / (swarmsize - 1)
     # NOTE: cannot run Dmin = D.min(1) and Dmax = D.max(1) in numba, so we use
@@ -131,69 +127,3 @@ def perform_adaptation(
     c1 = np.where(mask, 4 * c1 / sum_c, c1)
     c2 = np.where(mask, 4 * c2 / sum_c, c2)
     return w, c1, c2
-
-
-def adapt(
-    px: Array3d,
-    sx: Array3d,
-    nvec: int,
-    swarmsize: int,
-    lb: Array3d,
-    ub: Array3d,
-    w: Array3d,
-    c1: Array3d,
-    c2: Array3d,
-    np_random: np.random.Generator,
-    logger: logging.Logger,
-) -> tuple[Array3d, Array3d, Array3d]:
-    """Adapts the parameters `w`, `c1` and `c2` on-line.
-
-    Parameters
-    ----------
-    px : 3d array
-        Best positions of the particles so far. An array of shape `(N, M, d)`.
-    sx : 3d array
-        Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
-    nvec : int
-        Number of vectorized problems.
-    swarmsize : int
-        Number of particles in the swarm.
-    lb : 3d array
-        Lower bound of the search space. An array of shape `(N, 1, d)`.
-    ub : 3d array
-        Upper bound of the search space. An array of shape `(N, 1, d)`.
-    w : 3d array
-        Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
-        the corresponding problem.
-    c1 : 3d array
-        Cognitive weight. An array of shape `(N, 1, 1)`, where each element is used for
-        the corresponding problem.
-    c2 : 3d array
-        Social weight. An array of shape `(N, 1, 1)`, where each element is used for
-        the corresponding problem.
-    np_random : np.random.Generator
-        Random number generator.
-    logger : logging.Logger
-        Logger object.
-
-    Returns
-    -------
-    tuple of 3d arrays
-        The newly adapted parameters `w`, `c1` and `c2`.
-    """
-    w_new, c1_new, c2_new = perform_adaptation(
-        px, sx, nvec, swarmsize, lb, ub, w, c1, c2, np_random
-    )
-
-    if logger.level <= logging.DEBUG:
-        logger.debug(
-            "adaptation: w ∈ [%e, %e], c1 ∈ [%e, %e], c2 ∈ [%e, %e]",
-            w_new.min(),
-            w_new.max(),
-            c1_new.min(),
-            c1_new.max(),
-            c2_new.min(),
-            c2_new.max(),
-        )
-
-    return w_new, c1_new, c2_new

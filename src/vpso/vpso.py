@@ -1,4 +1,3 @@
-import logging
 from typing import Callable, Optional, Union
 
 import numpy as np
@@ -11,8 +10,6 @@ from vpso.initialization import adjust_dimensions as adj_dim
 from vpso.initialization import initialize_particles
 from vpso.termination import termination
 from vpso.typing import Array1d, Array1i, Array2d, Array3d
-
-logger = logging.getLogger(__name__)
 
 
 def vpso(
@@ -37,7 +34,6 @@ def vpso(
     patience: Union[int, Array1i] = 30,
     #
     seed: Optional[int] = None,
-    verbosity: int = logging.WARNING,
 ) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
     to solve multiple optimization problems simultaneously in a vectorized fashion.
@@ -99,9 +95,6 @@ def vpso(
         value for each of the `N` vectorized problems. By default, `1`.
     seed : int, optional
         Seed for the random number generator. By default, `None`.
-    verbosity : int, optional
-        Verbosity level of the solver. Levels higher than `INFO` log nothig. By default,
-        `logging.WARNING` is used.
 
     Returns
     -------
@@ -111,8 +104,6 @@ def vpso(
          - the best minimum of each problem
          - the termination reason as a string
     """
-    logger.setLevel(verbosity)
-
     # first, adjust some dimensions
     lb, ub, nvec, dim, max_velocity_rate, w, c1, c2, ftol, xtol, patience = adj_dim(
         lb, ub, max_velocity_rate, w, c1, c2, ftol, xtol, patience
@@ -128,12 +119,12 @@ def vpso(
     # initialize particle's best pos/value and global best
     px = x  # particle's best position
     pf = np.reshape(func(x), (nvec, swarmsize))  # particle's best value
-    sx, sf = get_best(px, pf, nvec, logger, 0)  # social/global best position/value
+    sx, sf = get_best(px, pf, nvec)  # social/global best position/value
 
     # main optimization loop
     patience_level = np.zeros((nvec, 2), dtype=np.int64)  # 2 level for x and for f
     termination_reason = "maxiter"
-    for i in range(1, maxiter + 1):
+    for _ in range(maxiter):
         x, v = generate_offsprings(
             x,
             px,
@@ -155,7 +146,7 @@ def vpso(
         )
         f = np.reshape(func(x), (nvec, swarmsize))  # evaluate particles (non-jittable)
         px, pf = advance_population(x, f, px, pf)
-        sx_new, sf_new = get_best(px, pf, nvec, logger, i)
+        sx_new, sf_new = get_best(px, pf, nvec)
 
         # DEBUG
         # px.flags.writeable = (
@@ -164,23 +155,11 @@ def vpso(
         # assert (sf_new <= sf).all()
 
         if adaptive:
-            w, c1, c2 = adapt(
-                px,
-                sx_new,
-                nvec,
-                swarmsize,
-                lb,
-                ub,
-                w,
-                c1,
-                c2,
-                np_random,
-                logger,
-            )
+            w, c1, c2 = adapt(px, sx_new, nvec, swarmsize, lb, ub, w, c1, c2, np_random)
 
         # check termination conditions
         should_terminate, reason = termination(
-            sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, patience, patience_level, logger
+            sx, sf, sx_new, sf_new, lb, ub, xtol, ftol, patience, patience_level
         )
         if should_terminate:
             termination_reason = reason
@@ -189,6 +168,4 @@ def vpso(
         # save new best
         sx = sx_new
         sf = sf_new
-
-    logger.info('termination due to "%s"', termination_reason)
     return sx[:, 0], sf, termination_reason
