@@ -19,7 +19,7 @@ from vpso.typing import Array3d
         nb.float64[:, :, :],  # w
         nb.float64[:, :, :],  # c1
         nb.float64[:, :, :],  # c2
-        nb.int64,  # iters
+        nb.int32,  # iters
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     cache=True,

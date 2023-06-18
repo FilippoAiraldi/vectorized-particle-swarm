@@ -10,8 +10,8 @@ from vpso.typing import Array2d, Array3d
         nb.bool_[:, :],  # mutation_mask
         nb.float64[:, :],  # lb
         nb.float64[:, :],  # ub
-        nb.int64,  # nvec
-        nb.int64,  # dim
+        nb.int32,  # nvec
+        nb.int32,  # dim
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     cache=True,
@@ -52,7 +52,7 @@ def polynomial_mutation(
         Modified best particles. An array of shape `(nvec, dim)`.
     """
     domain = ub - lb
-    eta = np_random.uniform(6.0, 31.0, (nvec, 1))
+    eta = np_random.uniform(6.0, 31.0, (nvec, np.int32(1)))
     mut_pow = 1.0 / eta
     xy1 = np.power((ub - x_best) / domain, eta)
     xy2 = np.power((x_best - lb) / domain, eta)
@@ -71,8 +71,8 @@ def polynomial_mutation(
         nb.float64[:, :],  # pf
         nb.float64[:, :, :],  # lb
         nb.float64[:, :, :],  # ub
-        nb.int64,  # nvec
-        nb.int64,  # dim
+        nb.int32,  # nvec
+        nb.int32,  # dim
         nb.float64,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
@@ -118,7 +118,7 @@ def mutate(
     """
     # get the mutation mask for each vectorized problem, and for each dimension
     mutation_mask = np.logical_and(
-        np_random.random((nvec, 1)) <= mutation_prob,
+        np_random.random((nvec, np.int32(1))) <= mutation_prob,
         np_random.random((nvec, dim)) <= min(0.5, 1 / dim),
     )
     if not mutation_mask.any():

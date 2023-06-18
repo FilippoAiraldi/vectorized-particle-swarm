@@ -54,8 +54,8 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     nb.types.UniTuple(nb.float64[:, :, :], 3)(
         nb.float64[:, :, :],  # px
         nb.float64[:, :, :],  # sx
-        nb.int64,  # nvec
-        nb.int64,  # swarmize
+        nb.int32,  # nvec
+        nb.int32,  # swarmize
         nb.float64[:, :, :],  # lb
         nb.float64[:, :, :],  # ub
         nb.float64[:, :, :],  # w
@@ -119,7 +119,9 @@ def adapt(
     w = (1 / (1 + 1.5 * np.exp(-2.6 * stage)))[:, np.newaxis, np.newaxis]
 
     # adapt c1 and c2
-    deltas = adaptation_strategy(stage) * np_random.uniform(0.05, 0.1, size=(nvec, 1))
+    deltas = adaptation_strategy(stage) * np_random.uniform(
+        0.05, 0.1, size=(nvec, np.int32(1))
+    )
     c1 = (c1 + deltas[:, 0, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     c2 = (c2 + deltas[:, 1, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     sum_c = c1 + c2

@@ -14,7 +14,7 @@ from vpso.typing import Array1d, Array1i, Array2i, Array3d
         nb.float64[:, :, :],  # ub
         nb.float64[:],  # xtol
         nb.float64[:],  # ftol
-        nb.int64[:, :],  # current_patience_level
+        nb.int32[:, :],  # current_patience_level
     ),
     cache=True,
     nogil=True,
@@ -57,7 +57,7 @@ def update_patience(
     ftol : 1d array
         Number of iterations to wait before terminating the solver if no improvement is
         witnessed. An array of shape `(N,)`.
-    current_patience_level : Array2i
+    current_patience_level : 2d array of ints
         Current patience level, i.e., for how many iterations the tolerances have been
         met. An array of shape `(N, 2)`, where the first column corresponds to the
         tolerance in `x`, and the second column in `f`. This array is modified in-place.
@@ -84,6 +84,22 @@ def update_patience(
     return D, F
 
 
+@nb.njit(
+    nb.types.Tuple((nb.bool_, nb.types.unicode_type))(
+        nb.float64[:, :, :],  # sx
+        nb.float64[:],  # sf
+        nb.float64[:, :, :],  # sx_new
+        nb.float64[:],  # sf_new
+        nb.float64[:, :, :],  # lb
+        nb.float64[:, :, :],  # ub
+        nb.float64[:],  # xtol
+        nb.float64[:],  # ftol
+        nb.int32[:],  # patience
+        nb.int32[:, :],  # current_patience_level
+    ),
+    cache=True,
+    nogil=True,
+)
 def termination(
     sx: Array3d,
     sf: Array1d,
@@ -124,10 +140,10 @@ def termination(
     ftol : 1d array
         Number of iterations to wait before terminating the solver if no improvement is
         witnessed. An array of shape `(N,)`.
-    patience : int or 1d array_like of ints, optional
+    patience : 1d array of ints, optional
         Number of iterations to wait before terminating the solver if no improvement is
         witnessed. An array of shape `(N,)`.
-    current_patience_level : Array2i
+    current_patience_level : 2d array of ints
         Current patience level, i.e., for how many iterations the tolerances have been
         met. An array of shape `(N, 2)`, where the first column corresponds to the
         tolerance in `x`, and the second column in `f`. This array is modified in-place.

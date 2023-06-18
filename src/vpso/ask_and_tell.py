@@ -17,12 +17,12 @@ from vpso.typing import Array1d, Array2d, Array3d
         nb.float64[:, :, :],  # v_max
         nb.float64[:, :, :],  # lb
         nb.float64[:, :, :],  # ub
-        nb.int64,  # nvec
-        nb.int64,  # dim
+        nb.int32,  # nvec
+        nb.int32,  # dim
         nb.float64[:, :, :],  # w
         nb.float64[:, :, :],  # c1
         nb.float64[:, :, :],  # c2
-        nb.int64,  # iters
+        nb.int32,  # iters
         nb.bool_,  # perturb_best
         nb.float64,  # mutation_prob
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),

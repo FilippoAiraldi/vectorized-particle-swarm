@@ -85,13 +85,13 @@ def adjust_dimensions(
         ub,
         nvec,
         dim,
-        _asarray(max_velocity_rate, nvec, float, 3),
-        _asarray(w, nvec, float, 3),
-        _asarray(c1, nvec, float, 3),
-        _asarray(c2, nvec, float, 3),
-        _asarray(ftol, nvec, float, 1),
-        _asarray(xtol, nvec, float, 1),
-        _asarray(patience, nvec, int, 1),
+        _asarray(max_velocity_rate, nvec, np.float64, 3),
+        _asarray(w, nvec, np.float64, 3),
+        _asarray(c1, nvec, np.float64, 3),
+        _asarray(c2, nvec, np.float64, 3),
+        _asarray(ftol, nvec, np.float64, 1),
+        _asarray(xtol, nvec, np.float64, 1),
+        _asarray(patience, nvec, np.int32, 1),
     )
 
 
