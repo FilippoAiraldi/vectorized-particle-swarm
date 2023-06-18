@@ -1,15 +1,37 @@
 import logging
 
+import numba as nb
 import numpy as np
 
-from vpso.jit import jit
 from vpso.math import pso_equation
 from vpso.mutation import mutate
 from vpso.reparation import repair_out_of_bounds
 from vpso.typing import Array1d, Array2d, Array3d
 
 
-@jit()
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :],  # x
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :],  # pf
+        nb.float64[:, :, :],  # sx
+        nb.float64[:, :, :],  # v
+        nb.float64[:, :, :],  # v_max
+        nb.float64[:, :, :],  # lb
+        nb.float64[:, :, :],  # ub
+        nb.int64,  # nvec
+        nb.int64,  # dim
+        nb.float64[:, :, :],  # w
+        nb.float64[:, :, :],  # c1
+        nb.float64[:, :, :],  # c2
+        nb.int64,  # iters
+        nb.bool_,  # perturb_best
+        nb.float64,  # mutation_prob
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
+    cache=True,
+    nogil=True,
+)
 def generate_offsprings(
     x: Array3d,
     px: Array3d,
@@ -87,7 +109,16 @@ def generate_offsprings(
     return x_new, v_new
 
 
-@jit()
+@nb.njit(
+    nb.types.Tuple((nb.float64[:, :, :], nb.float64[:, :]))(
+        nb.float64[:, :, :],  # x
+        nb.float64[:, :],  # f
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :],  # pf
+    ),
+    cache=True,
+    nogil=True,
+)
 def advance_population(
     x: Array3d, f: Array2d, px: Array3d, pf: Array2d
 ) -> tuple[Array3d, Array2d]:

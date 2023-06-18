@@ -1,13 +1,16 @@
 from typing import Literal
 
+import numba as nb
 import numpy as np
-from numba import prange
 
-from vpso.jit import jit
 from vpso.typing import Array2d, Array3d
 
 
-@jit()
+@nb.njit(
+    nb.float64[:, :](nb.float64[:, :], nb.float64[:, :], nb.types.unicode_type),
+    cache=True,
+    nogil=True,
+)
 def cdist_func(
     x: Array2d, y: Array2d, type: Literal["euclidean", "sqeuclidean"]
 ) -> Array2d:
@@ -38,7 +41,11 @@ def cdist_func(
     raise ValueError(f"unknown cdist type: {type}")
 
 
-@jit()
+@nb.njit(
+    nb.float64[:, :](nb.float64[:, :], nb.types.unicode_type),
+    cache=True,
+    nogil=True,
+)
 def pdist_func(x: Array2d, type: Literal["euclidean", "sqeuclidean"]) -> Array2d:
     """Computes the pairwise distance matrix of the elements in the 2D array `x`.
 
@@ -65,7 +72,14 @@ def pdist_func(x: Array2d, type: Literal["euclidean", "sqeuclidean"]) -> Array2d
     raise ValueError(f"unknown pdist type: {type}")
 
 
-@jit(parallel=True)
+@nb.njit(
+    nb.float64[:, :, :](
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
+    ),
+    cache=True,
+    nogil=True,
+    parallel=True,
+)
 def batch_cdist(
     X: Array3d, Y: Array3d, type: Literal["euclidean", "sqeuclidean"]
 ) -> Array3d:
@@ -90,12 +104,17 @@ def batch_cdist(
     """
     B, N, _ = X.shape
     out = np.empty((B, N, Y.shape[1]), dtype=X.dtype)
-    for i in prange(B):
+    for i in nb.prange(B):
         out[i] = cdist_func(X[i], Y[i], type)
     return out
 
 
-@jit(parallel=True)
+@nb.njit(
+    nb.float64[:, :, :](nb.float64[:, :, :], nb.types.unicode_type),
+    cache=True,
+    nogil=True,
+    parallel=True,
+)
 def batch_pdist(X: Array3d, type: Literal["euclidean", "sqeuclidean"]) -> Array3d:
     """Computes the pairwise distance matrices for the entries of a 3D array.
 
@@ -116,12 +135,19 @@ def batch_pdist(X: Array3d, type: Literal["euclidean", "sqeuclidean"]) -> Array3
     """
     B, N, _ = X.shape
     out = np.empty((B, N, N), dtype=X.dtype)
-    for i in prange(B):
+    for i in nb.prange(B):
         out[i] = pdist_func(X[i], type)
     return out
 
 
-@jit(parallel=True)
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
+    ),
+    cache=True,
+    nogil=True,
+    parallel=True,
+)
 def batch_cdist_and_pdist(
     X: Array3d, Y: Array3d, type: Literal["euclidean", "sqeuclidean"]
 ) -> tuple[Array3d, Array3d]:
@@ -147,13 +173,27 @@ def batch_cdist_and_pdist(
     B, N, _ = X.shape
     out_c = np.empty((B, N, Y.shape[1]), dtype=X.dtype)
     out_p = np.empty((B, N, N), dtype=X.dtype)
-    for i in prange(B):
+    for i in nb.prange(B):
         out_c[i] = cdist_func(X[i], Y[i], type)
         out_p[i] = pdist_func(X[i], type)
     return out_c, out_p
 
 
-@jit()
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :],  # x
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :, :],  # sx
+        nb.float64[:, :, :],  # v
+        nb.float64[:, :, :],  # v_max
+        nb.float64[:, :, :],  # w
+        nb.float64[:, :, :],  # c1
+        nb.float64[:, :, :],  # c2
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
+    cache=True,
+    nogil=True,
+)
 def pso_equation(
     x: Array3d,
     px: Array3d,

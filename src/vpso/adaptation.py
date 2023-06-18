@@ -11,14 +11,18 @@ References
 
 import logging
 
+import numba as nb
 import numpy as np
 
-from vpso.jit import _int, jit
 from vpso.math import batch_cdist_and_pdist
 from vpso.typing import Array1d, Array2d, Array3d
 
 
-@jit()
+@nb.njit(
+    nb.float64[:, :](nb.float64[:]),
+    cache=True,
+    nogil=True,
+)
 def adaptation_strategy(f: Array1d) -> Array2d:
     """Picks the adaptation strategy for each problem based on the ratio of average
     distances between particles and to the best particle.
@@ -48,7 +52,22 @@ def adaptation_strategy(f: Array1d) -> Array2d:
     return deltas
 
 
-@jit()
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:, :, :], 3)(
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :, :],  # sx
+        nb.int64,  # nvec
+        nb.int64,  # swarmize
+        nb.float64[:, :, :],  # lb
+        nb.float64[:, :, :],  # ub
+        nb.float64[:, :, :],  # w
+        nb.float64[:, :, :],  # c1
+        nb.float64[:, :, :],  # c2
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
+    cache=True,
+    nogil=True,
+)
 def perform_adaptation(
     px: Array3d,
     sx: Array3d,
@@ -104,9 +123,7 @@ def perform_adaptation(
     w = (1 / (1 + 1.5 * np.exp(-2.6 * stage)))[:, np.newaxis, np.newaxis]
 
     # adapt c1 and c2
-    deltas = adaptation_strategy(stage) * np_random.uniform(
-        0.05, 0.1, size=(nvec, _int(1))
-    )
+    deltas = adaptation_strategy(stage) * np_random.uniform(0.05, 0.1, size=(nvec, 1))
     c1 = (c1 + deltas[:, 0, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     c2 = (c2 + deltas[:, 1, np.newaxis, np.newaxis]).clip(1.5, 2.5)
     sum_c = c1 + c2

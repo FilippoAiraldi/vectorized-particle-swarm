@@ -1,12 +1,26 @@
 import logging
 
+import numba as nb
 import numpy as np
 
-from vpso.jit import jit
 from vpso.typing import Array1d, Array1i, Array2i, Array3d
 
 
-@jit()
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:], 2)(
+        nb.float64[:, :, :],  # sx
+        nb.float64[:],  # sf
+        nb.float64[:, :, :],  # sx_new
+        nb.float64[:],  # sf_new
+        nb.float64[:, :, :],  # lb
+        nb.float64[:, :, :],  # ub
+        nb.float64[:],  # xtol
+        nb.float64[:],  # ftol
+        nb.int64[:, :],  # current_patience_level
+    ),
+    cache=True,
+    nogil=True,
+)
 def update_patience(
     sx: Array3d,
     sf: Array1d,

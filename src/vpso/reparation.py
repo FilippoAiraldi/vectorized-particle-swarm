@@ -1,11 +1,30 @@
+import numba as nb
 import numpy as np
 
-from vpso.jit import jit
 from vpso.math import pso_equation
 from vpso.typing import Array3d
 
 
-@jit()
+@nb.njit(
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :],  # x
+        nb.float64[:, :, :],  # x_new
+        nb.float64[:, :, :],  # v_new
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :, :],  # sx
+        nb.float64[:, :, :],  # v
+        nb.float64[:, :, :],  # v_max
+        nb.float64[:, :, :],  # lb
+        nb.float64[:, :, :],  # ub
+        nb.float64[:, :, :],  # w
+        nb.float64[:, :, :],  # c1
+        nb.float64[:, :, :],  # c2
+        nb.int64,  # iters
+        nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
+    ),
+    cache=True,
+    nogil=True,
+)
 def repair_out_of_bounds(
     x: Array3d,
     x_new: Array3d,
