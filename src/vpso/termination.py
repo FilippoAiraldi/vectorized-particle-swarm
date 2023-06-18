@@ -59,9 +59,7 @@ def update_patience(
     # normalize sx and sx_new and compute normalized euclidean distance (could call
     # batch_cdist here, but it's only one vector per bathc, so this should be faster)
     domain = ub - lb
-    sx_norm = sx / domain
-    sx_new_norm = sx_new / domain
-    D = np.sqrt(np.square(sx_norm - sx_new_norm).sum(2))[:, 0]
+    D = np.sqrt(np.square((sx - sx_new) / domain).sum(2))[:, 0]
     current_patience_level[:, 0] = np.where(
         D <= xtol, current_patience_level[:, 0] + 1, 0
     )
@@ -87,7 +85,11 @@ def termination(
     current_patience_level: Array2i,
     logger: logging.Logger,
 ) -> tuple[bool, str]:
-    """_summary_
+    """Checks whether the solver should terminate, and the reason why. Updates the
+    patience level for each problem as a function of the previous and next best
+    particle. The level is increased if tolerances are met, and reset to zero if the new
+    best particle is better than the previous one by a margin larger than the
+    tolerances. `current_patience_level` is modified in-place.
 
     Parameters
     ----------

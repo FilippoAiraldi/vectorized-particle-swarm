@@ -77,8 +77,8 @@ def adjust_dimensions(
         Returns the `lb`, `ub`, `nvec`, `dim`, `max_velocity_rate`, `w`, `c1`, `c2`,
         `ftol`, `xtol`, and `patience`.
     """
-    lb = np.expand_dims(lb, 1).astype(float, copy=True)  # add swarm dimension
-    ub = np.expand_dims(ub, 1).astype(float, copy=True)  # add swarm dimension
+    lb = lb[:, np.newaxis].astype(float, copy=False)  # add swarm dimension
+    ub = ub[:, np.newaxis].astype(float, copy=False)  # add swarm dimension
     nvec, _, dim = lb.shape
     return (
         lb,

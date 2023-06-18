@@ -119,8 +119,8 @@ def vpso(
     )
 
     # initialize particle positions and velocities
-    lhs_sampler = LatinHypercube(d=nvec * dim, seed=seed)
     np_random = np.random.Generator(np.random.PCG64(seed))
+    lhs_sampler = LatinHypercube(d=nvec * dim, seed=np_random)
     x, v, v_max = initialize_particles(
         nvec, swarmsize, dim, lb, ub, max_velocity_rate, lhs_sampler, np_random
     )
