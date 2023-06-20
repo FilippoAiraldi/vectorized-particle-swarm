@@ -96,7 +96,7 @@ class TestAdaptation(unittest.TestCase):
         c1 = np.random.rand(nvec) + 2
         c2 = np.random.rand(nvec) + 2
 
-        np_random = np.random.Generator(np.random.PCG64(seed))
+        np_random = np.random.default_rng(seed)
         deltas = 0.05 + np_random.random(size=nvec) * 0.05
         w_new, c1_new, c2_new = [], [], []
         for i in range(nvec):
@@ -113,7 +113,7 @@ class TestAdaptation(unittest.TestCase):
             c1_new.append(o[1])
             c2_new.append(o[2])
 
-        np_random = np.random.Generator(np.random.PCG64(seed))
+        np_random = np.random.default_rng(seed)
         w_new_, c1_new_, c2_new_ = adapt(
             px,
             sx[:, np.newaxis],

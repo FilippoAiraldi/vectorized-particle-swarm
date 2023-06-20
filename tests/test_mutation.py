@@ -8,7 +8,7 @@ from vpso.mutation import mutate, polynomial_mutation
 
 class TestMutation(unittest.TestCase):
     def test_mutate__if_mutation_prob_is_zero__returns_immediately(self):
-        np_random = np.random.Generator(np.random.PCG64())
+        np_random = np.random.default_rng()
         nvec, dim = np_random.integers(3, 10, size=2)
         swarmsize = np_random.integers(1000, 2000)
         ub = np.abs(np_random.normal(size=(nvec, 1, dim))) + 10
@@ -23,7 +23,7 @@ class TestMutation(unittest.TestCase):
         np.testing.assert_array_equal(x_original, x_mutated)
 
     def test_mutate__performs_mutation(self):
-        np_random = np.random.Generator(np.random.PCG64(17))
+        np_random = np.random.default_rng(17)
         nvec, dim = np_random.integers(3, 10, size=2)
         swarmsize = np_random.integers(1000, 2000)
         ub = np.abs(np_random.normal(size=(nvec, 1, dim))) + 10
@@ -44,7 +44,7 @@ class TestMutation(unittest.TestCase):
 
     def test_polynomial_mutation(self):
         seed = np.random.randint(0, 1000)
-        np_random = np.random.Generator(np.random.PCG64(seed))
+        np_random = np.random.default_rng(seed)
         nvec, dim = np_random.integers(3, 10, size=2)
         ub = np.abs(np_random.normal(size=(nvec, dim))) + 10
         lb = -np.abs(np_random.normal(size=(nvec, dim))) - 10
@@ -67,7 +67,7 @@ class TestMutation(unittest.TestCase):
             deltaq[mask_not] = d[mask_not]
             return (X + deltaq * (ub - lb)).clip(lb, ub)
 
-        np_random = np.random.Generator(np.random.PCG64(seed))
+        np_random = np.random.default_rng(seed)
         eta = np_random.uniform(5, 30, size=nvec)
         rand = np_random.uniform(size=(nvec, dim))
         expected = [
@@ -75,7 +75,7 @@ class TestMutation(unittest.TestCase):
             for i in range(nvec)
         ]
 
-        np_random = np.random.Generator(np.random.PCG64(seed))
+        np_random = np.random.default_rng(seed)
         actual = polynomial_mutation(
             x, np.full((nvec, dim), True), lb, ub, nvec, dim, np_random
         )

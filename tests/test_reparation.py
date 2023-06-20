@@ -8,7 +8,7 @@ from vpso.reparation import repair_out_of_bounds
 
 class TestReparation(unittest.TestCase):
     def test_repair_out_of_bounds__if_in_bounds__returns_immediately(self):
-        np_random = np.random.Generator(np.random.PCG64())
+        np_random = np.random.default_rng()
         nvec, dim = np_random.integers(3, 10, size=2)
         swarmsize = np_random.integers(1000, 2000)
         ub = np.abs(np_random.normal(size=(nvec, 1, dim))) + 10
@@ -46,7 +46,7 @@ class TestReparation(unittest.TestCase):
 
     @parameterized.expand([(0,), (200,)])
     def test_repair_out_of_bounds__with_resamplimg_repair(self, iters: int):
-        np_random = np.random.Generator(np.random.PCG64())
+        np_random = np.random.default_rng()
         nvec, dim = np_random.integers(3, 10, size=2)
         swarmsize = np_random.integers(1000, 2000)
         ub = np.abs(np_random.normal(size=(nvec, 1, dim))) + 10

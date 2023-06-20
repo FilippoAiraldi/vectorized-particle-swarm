@@ -33,7 +33,7 @@ def vpso(
     xtol: Union[float, Array1d] = 1e-8,
     patience: Union[int, Array1i] = 30,
     #
-    seed: Union[None, int, np.random.Generator] = None,
+    seed: Union[None, int, np.random.SeedSequence, np.random.Generator] = None,
 ) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
     to solve multiple optimization problems simultaneously in a vectorized fashion.
@@ -110,9 +110,7 @@ def vpso(
     )
 
     # initialize particle positions and velocities
-    np_random = (
-        seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
-    )
+    np_random = np.random.default_rng(seed)
     lhs_sampler = LatinHypercube(d=nvec * dim, seed=np_random)
     x, v, v_max = initialize_particles(
         nvec, swarmsize, dim, lb, ub, max_velocity_rate, lhs_sampler, np_random
