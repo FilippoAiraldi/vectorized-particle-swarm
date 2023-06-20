@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Union
+from typing import Callable, Union
 
 import numpy as np
 from numpy.typing import ArrayLike
@@ -33,7 +33,7 @@ def vpso(
     xtol: Union[float, Array1d] = 1e-8,
     patience: Union[int, Array1i] = 30,
     #
-    seed: Optional[int] = None,
+    seed: Union[None, int, np.random.Generator] = None,
 ) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
     to solve multiple optimization problems simultaneously in a vectorized fashion.
@@ -93,8 +93,8 @@ def vpso(
         Number of iterations to wait before terminating the solver if no improvement is
         witnessed. Can also be an 1d array_like of shape `(N,)` to specify a different
         value for each of the `N` vectorized problems. By default, `1`.
-    seed : int, optional
-        Seed for the random number generator. By default, `None`.
+    seed : int or generator, optional
+        Seed for the random number generator, or a generator. By default, `None`.
 
     Returns
     -------
@@ -110,7 +110,9 @@ def vpso(
     )
 
     # initialize particle positions and velocities
-    np_random = np.random.Generator(np.random.PCG64(seed))
+    np_random = (
+        seed if isinstance(seed, np.random.Generator) else np.random.default_rng(seed)
+    )
     lhs_sampler = LatinHypercube(d=nvec * dim, seed=np_random)
     x, v, v_max = initialize_particles(
         nvec, swarmsize, dim, lb, ub, max_velocity_rate, lhs_sampler, np_random
