@@ -5,11 +5,11 @@ from vpso.typing import Array2d, Array3d
 
 
 @nb.njit(
-    nb.float64[:, :](
-        nb.float64[:, :],  # x_best
-        nb.bool_[:, :],  # mutation_mask
-        nb.float64[:, :],  # lb
-        nb.float64[:, :],  # ub
+    nb.types.Array(nb.float64, 2, "A")(
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # x_best
+        nb.types.Array(nb.bool_, 2, "A", readonly=True),  # mutation_mask
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # ub
         nb.int32,  # nvec
         nb.int32,  # dim
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
@@ -60,17 +60,16 @@ def polynomial_mutation(
     val1 = np.power(2.0 * R + (1.0 - 2.0 * R) * xy1, mut_pow)
     val2 = np.power(2.0 * (1.0 - R) + 2.0 * (R - 0.5) * xy2, mut_pow)
     deltaq = np.where(R <= 0.5, val1 - 1.0, 1.0 - val2)
-
     return np.where(mutation_mask, x_best + deltaq * domain, x_best).clip(lb, ub)
 
 
 @nb.njit(
     nb.types.void(
-        nb.float64[:, :, :],  # x
-        nb.float64[:, :, :],  # px
-        nb.float64[:, :],  # pf
-        nb.float64[:, :, :],  # lb
-        nb.float64[:, :, :],  # ub
+        nb.types.Array(nb.float64, 3, "A"),  # x
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # px
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # pf
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # ub
         nb.int32,  # nvec
         nb.int32,  # dim
         nb.float64,  # mutation_prob

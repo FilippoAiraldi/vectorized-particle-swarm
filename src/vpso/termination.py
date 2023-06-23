@@ -5,16 +5,16 @@ from vpso.typing import Array1d, Array1i, Array2i, Array3d
 
 
 @nb.njit(
-    nb.types.UniTuple(nb.float64[:], 2)(
-        nb.float64[:, :, :],  # sx
-        nb.float64[:],  # sf
-        nb.float64[:, :, :],  # sx_new
-        nb.float64[:],  # sf_new
-        nb.float64[:, :, :],  # lb
-        nb.float64[:, :, :],  # ub
-        nb.float64[:],  # xtol
-        nb.float64[:],  # ftol
-        nb.int32[:, :],  # current_patience_level
+    nb.types.UniTuple(nb.types.Array(nb.float64, 1, "A"), 2)(
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # sf
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx_new
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # sf_new
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # ub
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # xtol
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # ftol
+        nb.types.Array(nb.int32, 2, "A"),  # current_patience_level
     ),
     cache=True,
     nogil=True,
@@ -87,16 +87,16 @@ def update_patience(
 
 @nb.njit(
     nb.types.Tuple((nb.bool_, nb.types.unicode_type, nb.float64, nb.float64))(
-        nb.float64[:, :, :],  # sx
-        nb.float64[:],  # sf
-        nb.float64[:, :, :],  # sx_new
-        nb.float64[:],  # sf_new
-        nb.float64[:, :, :],  # lb
-        nb.float64[:, :, :],  # ub
-        nb.float64[:],  # xtol
-        nb.float64[:],  # ftol
-        nb.int32[:],  # patience
-        nb.int32[:, :],  # current_patience_level
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # sf
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx_new
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # sf_new
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # ub
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # xtol
+        nb.types.Array(nb.float64, 1, "A", readonly=True),  # ftol
+        nb.types.Array(nb.int32, 1, "A", readonly=True),  # patience
+        nb.types.Array(nb.int32, 2, "A"),  # current_patience_level
     ),
     cache=True,
     nogil=True,

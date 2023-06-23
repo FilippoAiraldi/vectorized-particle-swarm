@@ -17,7 +17,9 @@ from vpso.typing import Array1d, Array2d, Array3d
 
 
 @nb.njit(
-    nb.float64[:, :](nb.float64[:]),
+    nb.types.Array(nb.float64, 2, "A")(
+        nb.types.Array(nb.float64, 1, "A", readonly=True)
+    ),
     cache=True,
     nogil=True,
 )
@@ -51,16 +53,16 @@ def adaptation_strategy(f: Array1d) -> Array2d:
 
 
 @nb.njit(
-    nb.types.UniTuple(nb.float64[:, :, :], 3)(
-        nb.float64[:, :, :],  # px
-        nb.float64[:, :, :],  # sx
+    nb.types.UniTuple(nb.types.Array(nb.float64, 3, "A"), 3)(
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # px
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx
         nb.int32,  # nvec
         nb.int32,  # swarmize
-        nb.float64[:, :, :],  # lb
-        nb.float64[:, :, :],  # ub
-        nb.float64[:, :, :],  # w
-        nb.float64[:, :, :],  # c1
-        nb.float64[:, :, :],  # c2
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # ub
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # w
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c1
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c2
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     cache=True,

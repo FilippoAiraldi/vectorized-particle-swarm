@@ -8,20 +8,20 @@ from vpso.typing import Array1d, Array2d, Array3d
 
 
 @nb.njit(
-    nb.types.UniTuple(nb.float64[:, :, :], 2)(
-        nb.float64[:, :, :],  # x
-        nb.float64[:, :, :],  # px
-        nb.float64[:, :],  # pf
-        nb.float64[:, :, :],  # sx
-        nb.float64[:, :, :],  # v
-        nb.float64[:, :, :],  # v_max
-        nb.float64[:, :, :],  # lb
-        nb.float64[:, :, :],  # ub
+    nb.types.UniTuple(nb.types.Array(nb.float64, 3, "A"), 2)(
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # x
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # px
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # pf
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # v
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # v_max
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # lb
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # ub
         nb.int32,  # nvec
         nb.int32,  # dim
-        nb.float64[:, :, :],  # w
-        nb.float64[:, :, :],  # c1
-        nb.float64[:, :, :],  # c2
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # w
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c1
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c2
         nb.int32,  # iters
         nb.bool_,  # perturb_best
         nb.float64,  # mutation_prob
@@ -108,11 +108,13 @@ def generate_offsprings(
 
 
 @nb.njit(
-    nb.types.Tuple((nb.float64[:, :, :], nb.float64[:, :]))(
-        nb.float64[:, :, :],  # x
-        nb.float64[:, :],  # f
-        nb.float64[:, :, :],  # px
-        nb.float64[:, :],  # pf
+    nb.types.Tuple(
+        (nb.types.Array(nb.float64, 3, "A"), nb.types.Array(nb.float64, 2, "A"))
+    )(
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # x
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # f
+        nb.types.Array(nb.float64, 3, "A", readonly=True),  # px
+        nb.types.Array(nb.float64, 2, "A", readonly=True),  # pf
     ),
     cache=True,
     nogil=True,
