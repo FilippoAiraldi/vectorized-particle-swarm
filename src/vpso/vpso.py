@@ -28,9 +28,9 @@ def vpso(
     mutation_prob: float = 0.9,
     adaptive: bool = True,
     #
-    maxiter: int = 300,  # could be an array, but only the max would be then used
-    ftol: Union[float, Array1d] = 1e-8,
-    xtol: Union[float, Array1d] = 1e-8,
+    maxiter: int = 400,
+    ftol: Union[float, Array1d] = 1e-9,
+    xtol: Union[float, Array1d] = 1e-9,
     patience: Union[int, Array1i] = 30,
     #
     seed: Union[None, int, np.random.SeedSequence, np.random.Generator] = None,
