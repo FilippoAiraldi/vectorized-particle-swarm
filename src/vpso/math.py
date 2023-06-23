@@ -7,11 +7,7 @@ from vpso.typing import Array2d, Array3d
 
 
 @nb.njit(
-    nb.types.Array(nb.float64, 2, "A")(
-        nb.types.Array(nb.float64, 2, "A", readonly=True),
-        nb.types.Array(nb.float64, 2, "A", readonly=True),
-        nb.types.unicode_type,
-    ),
+    nb.float64[:, :](nb.float64[:, :], nb.float64[:, :], nb.types.unicode_type),
     cache=True,
     nogil=True,
 )
@@ -46,9 +42,7 @@ def cdist_func(
 
 
 @nb.njit(
-    nb.types.Array(nb.float64, 2, "A")(
-        nb.types.Array(nb.float64, 2, "A", readonly=True), nb.types.unicode_type
-    ),
+    nb.float64[:, :](nb.float64[:, :], nb.types.unicode_type),
     cache=True,
     nogil=True,
 )
@@ -79,10 +73,8 @@ def pdist_func(x: Array2d, type: Literal["euclidean", "sqeuclidean"]) -> Array2d
 
 
 @nb.njit(
-    nb.types.Array(nb.float64, 3, "A")(
-        nb.types.Array(nb.float64, 3, "A", readonly=True),
-        nb.types.Array(nb.float64, 3, "A", readonly=True),
-        nb.types.unicode_type,
+    nb.float64[:, :, :](
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
     ),
     cache=True,
     nogil=True,
@@ -118,9 +110,7 @@ def batch_cdist(
 
 
 @nb.njit(
-    nb.types.Array(nb.float64, 3, "A")(
-        nb.types.Array(nb.float64, 3, "A", readonly=True), nb.types.unicode_type
-    ),
+    nb.float64[:, :, :](nb.float64[:, :, :], nb.types.unicode_type),
     cache=True,
     nogil=True,
     parallel=True,
@@ -151,10 +141,8 @@ def batch_pdist(X: Array3d, type: Literal["euclidean", "sqeuclidean"]) -> Array3
 
 
 @nb.njit(
-    nb.types.UniTuple(nb.types.Array(nb.float64, 3, "A"), 2)(
-        nb.types.Array(nb.float64, 3, "A", readonly=True),
-        nb.types.Array(nb.float64, 3, "A", readonly=True),
-        nb.types.unicode_type,
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :], nb.float64[:, :, :], nb.types.unicode_type
     ),
     cache=True,
     nogil=True,
@@ -192,15 +180,15 @@ def batch_cdist_and_pdist(
 
 
 @nb.njit(
-    nb.types.UniTuple(nb.types.Array(nb.float64, 3, "A"), 2)(
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # x
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # px
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # sx
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # v
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # v_max
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # w
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c1
-        nb.types.Array(nb.float64, 3, "A", readonly=True),  # c2
+    nb.types.UniTuple(nb.float64[:, :, :], 2)(
+        nb.float64[:, :, :],  # x
+        nb.float64[:, :, :],  # px
+        nb.float64[:, :, :],  # sx
+        nb.float64[:, :, :],  # v
+        nb.float64[:, :, :],  # v_max
+        nb.float64[:, :, :],  # w
+        nb.float64[:, :, :],  # c1
+        nb.float64[:, :, :],  # c2
         nb.types.NumPyRandomGeneratorType("NumPyRandomGeneratorType"),
     ),
     cache=True,
