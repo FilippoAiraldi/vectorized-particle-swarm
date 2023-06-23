@@ -83,8 +83,20 @@ def adapt(
 
     Parameters
     ----------
+    px : 3d array
+        Best positions of the particles so far. An array of shape `(N, M, d)`, where `N`
+        is the number of vectorized problems to solve simultaneously, `M` the number of
+        particle, and `d` is the dimension of the search space.
+    sx : 3d array
+        Social best, i.e., the best particle so far. An array of shape `(N, 1, d)`.
     nvec : int
         Number of vectorized problems.
+    swarmsize : int
+        Number of particles in the swarm.
+    lb : 3d array
+        Lower bound of the search space. An array of shape `(N, 1, d)`.
+    ub : 3d array
+        Upper bound of the search space. An array of shape `(N, 1, d)`.
     w : 3d array
         Inertia weight. An array of shape `(N, 1, 1)`, where each element is used for
         the corresponding problem.
@@ -94,9 +106,6 @@ def adapt(
     c2 : 3d array
         Social weight. An array of shape `(N, 1, 1)`, where each element is used for
         the corresponding problem.
-    stage : 1d array
-        Current stage of the algorithm. An array of shape `(N,)`, where each element
-        corresponds to a problem.
     np_random : np.random.Generator
         Random number generator.
 
