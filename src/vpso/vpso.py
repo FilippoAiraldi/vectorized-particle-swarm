@@ -29,6 +29,7 @@ def vpso(
     adaptive: bool = True,
     #
     maxiter: int = 400,
+    maxevals: Union[int, float] = float("inf"),
     ftol: Union[float, Array1d] = 1e-9,
     xtol: Union[float, Array1d] = 1e-9,
     patience: Union[int, Array1i] = 30,
@@ -79,6 +80,9 @@ def vpso(
         Whether to adapt the weights at each iteration. By default, `True`.
     maxiter : int , optional
         Maximum number of iterations to run the optimization for. By default, `300`.
+    maxevals : int or float(inf)
+        Maximum number of evaluations of `f`, after which the algorithm is terminated.
+        By default, `+inf`.
     ftol : float or 1d array_like of floats, optional
         Tolerance for changes in the objective function value before terminating the
         solver. Can also be an 1d array_like of shape `(N,)` to specify a different
@@ -123,6 +127,7 @@ def vpso(
 
     # main optimization loop
     patience_level = np.zeros((nvec, 2), dtype=np.int32)  # 2 level for x and for f
+    evals = swarmsize
     termination_reason = "maxiter"
     for _ in range(maxiter):
         x, v = generate_offsprings(
@@ -163,6 +168,10 @@ def vpso(
         )
         if should_terminate:
             termination_reason = f"{reason} ∈ [{range_min:e}, {range_max:e}]"
+            break
+        evals += swarmsize
+        if evals >= maxevals:
+            termination_reason = "maxevals"
             break
 
         # save new best
