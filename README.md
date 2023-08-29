@@ -7,7 +7,7 @@
 ![Python 3.9](https://img.shields.io/badge/python->=3.9-green.svg)
 
 [![Tests](https://github.com/FilippoAiraldi/multi-pso/actions/workflows/ci.yml/badge.svg)](https://github.com/FilippoAiraldi/multi-pso/actions/workflows/ci.yml)
-[![Downloads](https://pepy.tech/badge/vpso)](https://pepy.tech/project/vpso)
+[![Downloads](https://static.pepy.tech/badge/vpso)](https://www.pepy.tech/projects/vpso)
 [![Maintainability](https://api.codeclimate.com/v1/badges/746f504e874cffeedae2/maintainability)](https://codeclimate.com/github/FilippoAiraldi/vectorized-particle-swarm/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/746f504e874cffeedae2/test_coverage)](https://codeclimate.com/github/FilippoAiraldi/vectorized-particle-swarm/test_coverage)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
