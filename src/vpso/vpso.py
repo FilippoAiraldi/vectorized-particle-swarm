@@ -37,7 +37,8 @@ def vpso(
     seed: Union[None, int, np.random.SeedSequence, np.random.Generator] = None,
 ) -> tuple[Array2d, Array1d, str]:
     """Vectorized Particle Swarm Optimization (VPSO). This implementation of PSO is able
-    to solve multiple optimization problems simultaneously in a vectorized fashion.
+    to solve multiple optimization problems simultaneously in a vectorized fashion. It
+    runs the adaptive version of PSO based on [1].
 
     Parameters
     ----------
@@ -107,6 +108,13 @@ def vpso(
          - the best minimizer of each problem
          - the best minimum of each problem
          - the termination reason as a string
+
+    References
+    ----------
+    [1] Z. H. Zhan, J. Zhang, Y. Li and H. S. H. Chung, "Adaptive Particle Swarm
+        Optimization," in IEEE Transactions on Systems, Man, and Cybernetics, Part B
+        (Cybernetics), vol. 39, no. 6, pp. 1362-1381, Dec. 2009,
+        doi: 10.1109/TSMCB.2009.2015956.
     """
     # first, adjust some dimensions
     lb, ub, nvec, dim, max_velocity_rate, w, c1, c2, ftol, xtol, patience = adj_dim(
