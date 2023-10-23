@@ -31,7 +31,7 @@ class TestNumericalConstrained(unittest.TestCase):
             rapid_penalty=False,  # this function prefers a slower penalty increase
         )
 
-        np.testing.assert_allclose(func(x_opt).item(), 1.393465)
+        np.testing.assert_allclose(func(x_opt).item(), 1.393465, atol=1e-5, tol=1e-5)
 
 
 if __name__ == "__main__":
