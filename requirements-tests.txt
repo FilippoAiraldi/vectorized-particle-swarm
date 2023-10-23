@@ -1,3 +1,4 @@
 coverage==7.0.4
 parameterized==0.8.1
 pymoo==0.6.0.1
+pyyaml==6.0
