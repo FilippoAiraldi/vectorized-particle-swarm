@@ -24,8 +24,9 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
-    "joblib >= 1.2.0",
-    "vpso >= 1.1.1",
+    "numba >= 0.57.1",
+    "scipy >= 1.10.1",
+    "typing_extensions >= 4.6.3",
 ]
 keywords = [
     "optimization",
