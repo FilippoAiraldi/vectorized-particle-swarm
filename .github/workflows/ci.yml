@@ -32,7 +32,7 @@ jobs:
         env:
           NUMBA_DISABLE_JIT: ${{ matrix.DISABLE_JIT }}
       - name: Coverage with Code Climate
-        uses: paambaati/codeclimate-action@v4.0.0
+        uses: paambaati/codeclimate-action@v5.0.0
         # send report only when jit is disabled, and for python 3.11
         if: ${{ matrix.DISABLE_JIT == 1 }}
         env:
