@@ -7,7 +7,7 @@ name = "vpso"
 authors = [
   { name="Filippo Airaldi", email="filippoairaldi@gmail.com" },
 ]
-description = "Myopic and Non-Myopic Global Optimization"
+description = "Vectorized Particle Swarm Optimization"
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "MIT" }
