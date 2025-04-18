@@ -61,7 +61,7 @@ The repository is provided under the MIT License. See the LICENSE file included 
 
 Copyright (c) 2023 Filippo Airaldi.
 
-Copyright notice: Technische Universiteit Delft hereby disclaims all copyright interest in the program “csnn” (Nueral Networks with CasADi) written by the Author(s). Prof. Dr. Ir. Fred van Keulen, Dean of 3mE.
+Copyright notice: Technische Universiteit Delft hereby disclaims all copyright interest in the program “vpso” (Vectorized Particle Swarm Optimization) written by the Author(s). Prof. Dr. Ir. Fred van Keulen, Dean of 3mE.
 
 ---
 
